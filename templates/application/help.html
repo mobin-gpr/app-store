@@ -1,0 +1,67 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block title %}
+    {{ help.title }}
+{% endblock %}
+
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="wrp-min speedbar">
+        <div class="speedbar-panel">
+        <span>
+          <span>
+            <a href="{% url 'index_page' %}">خانه</a>
+          </span>
+          »
+          <span class="breadcrumb_last" aria-current="page">{{ help.title }}</span>
+        </span>
+        </div>
+    </div>
+
+    <article class="view-news section">
+        <div class="view-news-head dark-head dark-section">
+            <div class="wrp-min">
+            </div>
+            <div class="background" style="display: none">
+                <i class="bg-clouds">
+                    <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 2550 700"
+                            width="2550"
+                            height="700"
+                    >
+                        <path
+                                fill="#142636"
+                                d="M554,100h-4A50,50,0,0,1,550,0h4a50,50,0,0,1,0,100Zm25,600H50a50,50,0,0,1,0-100h78.08a50,50,0,1,0,.11-100H98a50,50,0,0,1,0-100H238a50,50,0,0,0,0-100H194a50,50,0,0,1,0-100h56a50,50,0,0,0,.3-100H238A50,50,0,0,1,238,0H430a50,50,0,0,1,0,100H413.55a50,50,0,1,0,.05,100H630a50,50,0,0,1,0,100H521.55a50,50,0,1,0,0,100H526a50,50,0,0,1,0,100H445.55a50,50,0,0,0,.08,100H579a50,50,0,0,1,0,100Z"
+                        />
+                        <path
+                                fill="#142636"
+                                d="M2073,700a50,50,0,0,1,0-100h16.43a50,50,0,0,0,0-100H1901a50,50,0,0,1,0-100h216.42a50,50,0,0,0,0-100H2097a50,50,0,0,1-50-50h0a50,50,0,0,1,50-50h252a50,50,0,0,1,0,100h-28a50,50,0,0,0,0,100h24a50,50,0,0,1,0,100h-24a50,50,0,0,0,0,100h179a50,50,0,0,1,0,100Z"
+                        />
+                    </svg>
+                </i>
+            </div>
+        </div>
+        <div class="wrp-min block-list">
+            <div class="block b-article">
+                <div class="b-cont">
+                    <div class="text">
+                        <p>
+                            {{ help.description }}
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+{% endblock %}

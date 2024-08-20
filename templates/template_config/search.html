@@ -1,0 +1,105 @@
+{% extends '_base.html' %}
+{% block title %}
+    نتایج جستجو
+{% endblock %}
+{% block content %}
+    <body>
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="wrp-min speedbar">
+        <div class="speedbar-panel">
+        <span>
+            <span>
+                <a href="/static">خانه</a>
+            </span> 
+                »
+            <span class="breadcrumb_last" aria-current="page">
+                نتیجه جستجو: 
+            </span>
+        </span>
+        </div>
+    </div>
+    <div class="page-head-cat darkmod">
+        <div class="wrp-min">
+            <div class="head-cat-title">
+                <h1 class="title">جستجو</h1>
+            </div>
+        </div>
+        <i class="bg-clouds"></i>
+    </div>
+    <div class="page-cat-bg">
+        <div class="wrp page-cat-cont">
+            <div class="entry-listpage list-c6">
+                {% for object in objects %}
+                    <div class="entry entry-app">
+                        <div class="item">
+                            {% if object.is_update %}
+                                <span class="label label-up">آپدیت</span>
+                            {% endif %}
+                            {% if object.is_online %}
+                                <span class="label label-up left">آنلاین</span>
+                            {% endif %}
+                            {% if object.is_new %}
+                                <span class="label label-up left bottom">جدید</span>
+                            {% endif %}
+                            {% if object.is_free %}
+                                <span class="label label-free right free">رایگان</span>
+                            {% endif %}
+                            <figure class="img">
+                                <img
+                                        src="{{ object.icon.url }}"
+                                        alt="{{ object.title }}"
+                                        width="112"
+                                        height="112"
+                                />
+                            </figure>
+                            <h2 class="title">
+                                <a
+                                        class="item-link"
+                                        {% if object.group == '1' %}
+                                        href="{% url 'application_detail' object.slug %}"
+                                        {% else %}
+                                        href="{% url 'game_detail' object.slug %}"
+                                        {% endif %}
+                                ><span>{{ object.title }}</span></a
+                                >
+                            </h2>
+                            <span class="genre truncate"
+                            ><a
+                                    href="{% url 'softwares_category' object.main_caregory.slug %}"
+                                    rel="tag"
+                            >{{ object.main_caregory }}</a
+                            ></span
+                            >
+                            <ul class="entry-app-info">
+                                <li>
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__android"></use>
+                                    </svg
+                                    >
+                                    <span class="truncate">{{ object.android_version }}</span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__vers"></use>
+                                    </svg
+                                    >
+                                    <span class="truncate">{{ object.download_count }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="wrp-min"></div>
+        </div>
+    </body>
+{% endblock %}

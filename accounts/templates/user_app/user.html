@@ -1,0 +1,184 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block title %}پروفایل: {% if user.get_full_name %}{{ user.get_full_name }}{% else %}
+{{ user.username }}{% endif %}{% endblock %}
+
+{% block seo %}
+    <meta name="title" content="">
+    <meta name="description"
+          content="">
+    <meta name="keywords" content="بازی ها، برنامه ها، اندروید، رایگان، apk، مودها">
+    <meta name="generator" content="DataLife Engine (https://dle-news.ru)">
+    <link rel="canonical" href="https://{{ site_name }}">
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="دانلود رایگان بهترین بازی های اندروید | بازی های مود شده برای اندروید"
+          href="/search/?search=opensearch">
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="">
+    <meta property="twitter:description"
+          content="">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="{{ site_name }}">
+    <meta property="og:title" content="">
+    <meta property="og:description"
+          content="">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+{% endblock %}
+
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none;">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="page-sys page-user">
+        <section class="section">
+            <div class="wrp-min block-list">
+                <div class="block">
+                    <div class="userpage_head online">
+                        <div class="userpage-main-info">
+                            <div class="userpage-status">{% if user.is_staff %}مدیر{% elif not user.is_active %}تایید
+                                نشده{% else %}کاربر عادی{% endif %}</div>
+                            <div class="userpage-main-circle">
+                                <i class="avatar fit-cover">
+                                    <img alt=''
+                                         src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20105%20105'%3E%3C/svg%3E"
+                                            {% if user.avatar.image %}
+                                         data-lazy-srcset="{{ user.avatar.image.url }}"
+                                            {% else %}
+                                         data-lazy-srcset="{% static 'images/noavatar.webp' %}"
+                                            {% endif %}
+                                         class="avatar avatar-105 photo" height="105"
+                                         width="105"
+                                         decoding="async"
+                                            {% if user.avatar.image %}
+                                         data-lazy-src="{{ user.avatar.image.url }}"
+                                            {% else %}
+                                         data-lazy-src="{% static 'images/noavatar.webp' %}"
+                                            {% endif %}
+                                    <noscript>
+                                        <img alt=""
+                                                {% if user.avatar.image %}
+                                             src="{{ user.avatar.image.url }}"
+                                                {% else %}
+                                             src="{% static 'images/noavatar.webp' %}"
+                                                {% endif %}
+                                                {% if user.avatar.image %}
+                                             srcset="{{ user.avatar.image.url }}"
+                                                {% else %}
+                                             srcset="{% static 'images/noavatar.webp' %}"
+                                                {% endif %}
+                                             class="avatar avatar-105 photo" height="105" width="105"
+                                             decoding="async"
+                                        />
+                                    </noscript>
+                                </i>
+                                {% if user.id == c_user.id %}
+                                    <a href="{% url 'profile_page' %}" class="user_edit btn c-icon s-green"
+                                       type="button">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__edit"></use>
+                                        </svg>
+                                    </a>
+                                {% endif %}
+                                <svg version="1.1" viewBox="0 0 640 640" width="640" height="640">
+                                    <style type="text/css">
+                                        .st0 {
+                                            animation: circle_rotate 12s infinite linear;
+                                            transform-origin: 50% 50%;
+                                            fill: none;
+                                            stroke: #4ccb70;
+                                            stroke-width: 1;
+                                            stroke-linecap: round;
+                                            stroke-miterlimit: 10;
+                                            stroke-dasharray: 358.478, 200.7477;
+                                        }
+
+                                        .st1 {
+                                            animation: circle_rotate 18s infinite linear;
+                                            transform-origin: 50% 50%;
+                                            fill: none;
+                                            stroke: #4ccb70;
+                                            stroke-width: 1;
+                                            stroke-linecap: round;
+                                            stroke-miterlimit: 10;
+                                            stroke-dasharray: 428.294, 239.8446;
+                                        }
+
+                                        @keyframes circle_rotate {
+                                            0% {
+                                                transform: rotate(0deg);
+                                            }
+                                            100% {
+                                                transform: rotate(360deg);
+                                            }
+                                        }
+                                    </style>
+                                    <circle class="st0" cx="320" cy="320" r="178"></circle>
+                                    <circle class="st1" cx="320" cy="320" r="319"></circle>
+                                </svg>
+                            </div>
+                            <div class="userpage-main-names">
+                                <h1 class="title">{% if user.get_full_name %}{{ user.get_full_name }}{% else %}
+                                    {{ user.username }}{% endif %}</h1>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="b-cont">
+                        <ul class="userpage-addon">
+                            <li>
+                                <div class="item">
+                                    <span class="uppercase muted small">ثبت نام</span>
+                                    <div class="fw-b">{{ user.jajali_sign_up_date }}</div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item">
+                                    <span class="uppercase muted small">آخرین ورود</span>
+                                    {% if not user.last_login %}
+                                        <div class="fw-b">-</div>
+                                    {% else %}
+                                        <div class="fw-b">{{ user.jajali_last_login_date }}</div>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item">
+                                    {% if user.is_staff %}
+                                        <a href="{% url 'filter_app_by_author' user.username %}"><span
+                                                class="uppercase muted small">اپلیکیشن ها</span></a>
+                                        <div class="fw-b">{{ user.applicationmodel_set.count }}</div>
+                                    {% else %}
+                                        <span class="uppercase muted small">درخواست اپلیکیشن</span>
+                                        <div class="fw-b">{{ app_requests_count }}</div>
+                                    {% endif %}
+
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item">
+                                    {% if user.is_staff %}
+                                        <a href="{% url 'filter_news_by_author' user.username %}"><span
+                                                class="uppercase muted small">اخبار</span></a>
+                                        <div class="fw-b">{{ user.newsmodel_set.count }}</div>
+                                    {% else %}
+                                        <span class="uppercase muted small">نظرات</span>
+                                        <div class="fw-b">{{ comments_count }}</div>
+                                    {% endif %}
+
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+{% endblock %}

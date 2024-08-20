@@ -1,0 +1,48 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block title %}تغییر آواتار{% endblock %}
+{% block style %}
+<link rel="stylesheet" href="{% static 'notyf.min.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none;">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="page-sys page-user">
+        <section class="section">
+            <div class="wrp-min block-list">
+                <div class="block">
+                    <div class="avatar-title">
+                        <h3>آواتار خود را انتخاب کنید.</h3>
+                    </div>
+                    <div class="avatar-content">
+                        {% csrf_token %}
+                        {% for avatar in avatars %}
+                            <div class="avatar-{{ avatar.id }} avatar-box-{{ avatar.id }} avatar-box {% if avatar.id == user.avatar.id %}active-avatar{% endif %}">
+                                <img class="avatar-{{ avatar.id }}" src="{{ avatar.image.url }}">
+                            </div>
+
+                        {% endfor %}
+                    </div>
+                    <div class="avatar-button">
+                        <div class="form-submit">
+                            <button class="btn s-green btn-block" type="submit" name="submit">ذخیره</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/notyf.min.js' %}"></script>
+    <script src="{% static 'js/avatars.js' %}"></script>
+{% endblock %}

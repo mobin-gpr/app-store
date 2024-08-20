@@ -1,0 +1,136 @@
+{% extends '_base.html' %}
+{% block title %}
+    100 نرم افزار برتر
+{% endblock %}
+{% block seo %}
+    <meta name="title" content="">
+    <meta name="description"
+          content="">
+    <meta name="keywords" content="بازی ها، برنامه ها، اندروید، رایگان، apk، مودها">
+    <meta name="generator" content="DataLife Engine (https://dle-news.ru)">
+    <link rel="canonical" href="">
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="دانلود رایگان بهترین بازی های اندروید | بازی های مود شده برای اندروید"
+          href="/search/?search=opensearch">
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="">
+    <meta property="twitter:description"
+          content="">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="">
+    <meta property="og:title" content="">
+    <meta property="og:description"
+          content="">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+{% endblock %}
+{% block content %}
+    <body>
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="page-sys">
+        <section class="section">
+            <div class="page-head-main">
+                <h1 class="title"><span class="d-block">100 برنامه برتر</span></h1>
+                <img
+                        width="1408"
+                        height="276"
+                        src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201408%20276'%3E%3C/svg%3E"
+                        alt=""
+                        data-lazy-src="https://demof.ir/appstore/wp-content/themes/appstore/images/main_illustration.svg"
+                />
+                <noscript
+                ><img
+                        width="1408"
+                        height="276"
+                        src="https://demof.ir/appstore/wp-content/themes/appstore/images/main_illustration.svg"
+                        alt=""
+                /></noscript>
+            </div>
+            <section class="wrp section">
+                <div class="entry-list list-c6">
+                    {% for app in apps %}
+                        <div class="entry entry-app">
+                            <div class="item">
+                                {% if app.is_update %}
+                                    <span class="label label-up">آپدیت</span>
+                                {% endif %}
+                                {% if app.is_online %}
+                                    <span class="label label-up left">آنلاین</span>
+                                {% endif %}
+                                {% if app.is_new %}
+                                    <span class="label label-up left bottom">جدید</span>
+                                {% endif %}
+                                {% if app.is_free %}
+                                    <span class="label label-free right free">رایگان</span>
+                                {% endif %}
+                                <figure class="img">
+                                    <img
+                                            src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20112%20112'%3E%3C/svg%3E"
+                                            alt="{{ app.title }}"
+                                            width="112"
+                                            height="112"
+                                            data-lazy-src="{{ app.icon.url }}"
+                                    />
+                                    <noscript
+                                    ><img
+                                            src="{{ app.icon.url }}"
+                                            alt="{{ app.title }}"
+                                            width="112"
+                                            height="112"
+                                    /></noscript>
+                                    {% if app.is_mod %}
+                                        <span class="post__modpaid">مود</span>
+                                    {% endif %}
+                                </figure>
+                                <h2 class="title">
+                                    <a
+                                            class="item-link"
+                                            {% if app.group == '1' %}
+                                            href="{% url 'application_detail' app.slug %}"
+                                            {% else %}
+                                            href="{% url 'game_detail' app.slug %}"
+                                            {% endif %}
+
+                                    ><span>{{ app.title }}</span></a
+                                    >
+                                </h2>
+                                <span class="genre truncate"
+                                ><a
+                                        href="{% url 'softwares_category' app.main_caregory.slug %}"
+                                        rel="tag"
+                                >{{ app.main_caregory }}</a
+                                ></span
+                                >
+                                <ul class="entry-app-info">
+                                    <li>
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__android"></use>
+                                        </svg>
+                                        <span class="truncate">{{ app.android_version }}</span>
+                                    </li>
+                                    <li>
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__vers"></use>
+                                        </svg>
+                                        <span class="truncate">{{ app.download_count }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </section>
+        </section>
+    </div>
+    </body>
+{% endblock %}

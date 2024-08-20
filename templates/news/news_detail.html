@@ -1,0 +1,621 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block title %}
+    {{ news.title }}
+{% endblock %}
+{% block seo %}
+    <meta name="title" content="{{ news.title }}">
+    <meta name="description"
+          content="{{ news.seo_desc }}">
+    <meta name="keywords" content="خبر، تکنولوژی، موبایل، اندروید، لپتاپ">
+    <meta name="generator" content="DataLife Engine (https://dle-news.ru)">
+    <link rel="canonical" href="https://{{ site_name }}">
+    <link rel="search" type="application/opensearchdescription+xml"
+          title=""
+          href="/search/?search=opensearch">
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="{{ news.title }}">
+    <meta property="twitter:description"
+          content="{{ news.seo_desc }}">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="{{ site_name }}">
+    <meta property="og:title" content="{{ news.title }}">
+    <meta property="og:description"
+          content=""{{ news.seo_desc }}>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'notyf.min.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="wrp-min speedbar">
+        <div class="speedbar-panel">
+        <span>
+          <span>
+            <a href="/static">خانه</a>
+          </span>
+          »
+          <span>
+            <a href="/news">اخبار</a>
+          </span>
+          »
+          <span class="breadcrumb_last" aria-current="page">{{ news.title }}</span>
+        </span>
+        </div>
+    </div>
+
+    <article class="view-news section" id="{{ news.id }}">
+        <div class="view-news-head dark-head dark-section">
+            <div class="wrp-min">
+                <div class="vn-head-main">
+                    <h1 itemprop="name" class="title">
+                        {{ news.title }}
+                    </h1>
+                    <div class="meta muted">
+                        <time class="meta-date">{{ news.jalali_created_at }}</time>
+                        <div class="meta-view">
+                            <svg width="24" height="24">
+                                <use xlink:href="#i__stats"></use>
+                            </svg>
+                            {{ news.newsvisitmodel_set.count }}
+                        </div>
+                        <div class="category">
+                            {% for tag in news.tag.all %}
+                                <a
+                                        href="{% url 'news_category' tag.slug %}"
+                                        rel="tag">{{ tag.name }}</a>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </div>
+                <div class="likes" id="news-likes" data-id="443">
+                    {% csrf_token %}
+                    <a href="#" data-action="like">
+              <span class="like-plus">
+                <svg width="24" height="24">
+                  <use xlink:href="#i__thumbup"></use>
+                </svg>
+                +
+                <span>{{ likes }}</span>
+              </span>
+                        <span class="sr-only">لایک</span>
+                    </a>
+                    <a href="#" data-action="dislike">
+              <span class="like-minus">
+                <svg width="24" height="24">
+                  <use xlink:href="#i__thumbdown"></use>
+                </svg>
+                -
+                <span>{{ dislike }}</span>
+              </span>
+                        <span class="sr-only">دیس لایک</span>
+                    </a>
+                </div>
+            </div>
+            <div class="background" style="display: none">
+                <i class="bg-clouds">
+                    <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 2550 700"
+                            width="2550"
+                            height="700"
+                    >
+                        <path
+                                fill="#142636"
+                                d="M554,100h-4A50,50,0,0,1,550,0h4a50,50,0,0,1,0,100Zm25,600H50a50,50,0,0,1,0-100h78.08a50,50,0,1,0,.11-100H98a50,50,0,0,1,0-100H238a50,50,0,0,0,0-100H194a50,50,0,0,1,0-100h56a50,50,0,0,0,.3-100H238A50,50,0,0,1,238,0H430a50,50,0,0,1,0,100H413.55a50,50,0,1,0,.05,100H630a50,50,0,0,1,0,100H521.55a50,50,0,1,0,0,100H526a50,50,0,0,1,0,100H445.55a50,50,0,0,0,.08,100H579a50,50,0,0,1,0,100Z"
+                        />
+                        <path
+                                fill="#142636"
+                                d="M2073,700a50,50,0,0,1,0-100h16.43a50,50,0,0,0,0-100H1901a50,50,0,0,1,0-100h216.42a50,50,0,0,0,0-100H2097a50,50,0,0,1-50-50h0a50,50,0,0,1,50-50h252a50,50,0,0,1,0,100h-28a50,50,0,0,0,0,100h24a50,50,0,0,1,0,100h-24a50,50,0,0,0,0,100h179a50,50,0,0,1,0,100Z"
+                        />
+                    </svg>
+                </i>
+            </div>
+        </div>
+        <div class="wrp-min block-list">
+            <div class="block b-article">
+                {% if news.image %}
+                    <div class="img">
+                        <figure class="fit-cover">
+                            <img
+                                    width="1024"
+                                    height="683"
+                                    src="data:"
+                                    class="attachment-large size-large wp-post-image"
+                                    alt="{{ news.title }}"
+                                    decoding="async"
+                                    fetchpriority="high"
+                                    data-lazy-srcset="{{ news.image.url }}"
+                                    data-lazy-sizes="(max-width: 1024px) 100vw, 1024px"
+                                    data-lazy-src="{{ news.image.url }}"
+                            />
+                        </figure>
+                    </div>
+                {% endif %}
+                <div class="b-cont">
+                    <div class="text">
+                        <p>
+                            {{ news.content }}
+                        </p>
+
+                        <div class="tags">
+                            {% for tag in news.tag.all %}
+                                <a
+                                        href="{% url 'news_category' tag.slug %}"
+                                        rel="tag">{{ tag.name }}</a>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% if not user.is_authenticated %}
+                <div class="alert-line">
+                    <div class="wrp-min">
+                        <i class="i__info">
+                            <svg width="24" height="24">
+                                <use xlink:href="#i__info"></use>
+                            </svg>
+                        </i>
+                        <div class="alert-cont">
+                            برای ارسال نظر ابتدا وارد حساب کاربری خود شوید یا
+                            <a href="/register" target="/_blank/" rel="/nofollow/">ثبت نام</a>
+                            کنید.
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="block b-comments">
+                <div class="b-head">
+                    <h3 class="section-title">
+                        <i class="s-purple c-icon">
+                            <svg width="24" height="24">
+                                <use xlink:href="#i__coms"></use>
+                            </svg>
+                        </i>
+                        {{ comments_count }} نظر
+                    </h3>
+                    {% if user.is_authenticated %}
+                        <a href="#dle-comments-form" class="btn s-green btn-all anchor">
+                            <span>ارسال نظر</span>
+                            <svg width="24" height="24">
+                                <use xlink:href="#i__keyright"></use>
+                            </svg>
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if comments_count != 0 %}
+                    <div class="b-cont">
+                        <div id="dlemasscomments">
+                            <div id="dle-comments-list">
+                                <div id="dle-ajax-comments"></div>
+                                <div id="comment"></div>
+                                <ol class="comments-tree-list">
+                                    {% for comment in comments %}
+                                        <li id="{{ comment.user }}-{{ comment.id }}" class="comments-tree-item">
+                                            <div>
+                                                <div class="comment {% if comment.user.is_staff %} add-comm 
+                                                    {% else %}{% if comment.newscommentslikemodel_set.count == comment.newscommentsdislikemodel_set.count %} {% elif comment.newscommentslikemodel_set.count >= comment.newscommentsdislikemodel_set.count %}pos-comm{% else %}neg-comm{% endif %} {% endif %} guest-view-com"
+                                                     id="comment-{{ comment.id }}">
+                                                    <div class="comment-head">
+                                                        <div class="avatar-status">
+                                                            <i class="avatar fit-cover">
+                                                                <a href="{% url 'public_profile_page' comment.user.username %}">
+                                                                    <img
+                                                                            {% if comment.user.avatar %}
+                                                                                src="{{ comment.user.avatar.image.url }}"
+                                                                            {% else %}
+                                                                                src="{% static 'images/noavatar.webp' %}"
+                                                                            {% endif %}
+                                                                                alt="{{ comment.user }}"
+                                                                                loading="lazy">
+                                                                </a>
+                                                            </i>
+                                                        </div>
+                                                        <span class="name truncate">
+                                                        <a href="{% url 'public_profile_page' comment.user.username %}">{{ comment.user }}</a>
+                                                    </span>
+                                                        <div class="comment-meta">
+                                                            {% if comment.user.is_staff %}
+                                                                <span class="group-label g-user">مدیر</span>
+                                                            {% else %}
+                                                                <span class="group-label g-user">عضو</span>
+                                                            {% endif %}
+                                                            <time class="date c-muted" datetime="2023-01-27T08:28">
+                                                                {{ comment.send_date }}
+                                                            </time>
+                                                        </div>
+                                                    </div>
+                                                    <div class="comment-text">
+                                                        <div id="comm-id-198045">{{ comment.text }}</div>
+                                                    </div>
+                                                    <div class="comment-foot">
+                                                        {% if user.is_authenticated %}
+                                                            <ul class="comment-tools">
+                                                                <li class="com__reply">
+                                                                    <a href="#dle-comments-form">
+                                                                        <svg width="24" height="24"
+                                                                             class="{{ comment.user }}-{{ comment.id }}">
+                                                                            <use class="{{ comment.user }}-{{ comment.id }}"
+                                                                                 xlink:href="#i__reply"></use>
+                                                                        </svg>
+                                                                    </a></li>
+                                                                <li class="com__edit"></li>
+                                                                <li class="com__del"></li>
+                                                                <li class="com__spam"></li>
+                                                            </ul>
+                                                        {% endif %}
+                                                        {% if not comment.user.is_staff %}
+                                                            <div class="news-com-likes">
+                                                                <a href="#" class="{{ comment.id }}" data-action="like">
+                                                                <span class="{{ comment.id }} com-like-plus">
+                                                                    <svg width="24" height="24"
+                                                                         class="{{ comment.id }}">
+                                                                        <use xlink:href="#i__thumbup"
+                                                                             class="{{ comment.id }}"></use>
+                                                                    </svg>
+
+                                                                    <span class="{{ comment.id }} {{ comment.id }}-com-like-count">
+                                                                        {{ comment.newscommentslikemodel_set.count }}
+                                                                    </span>
+                                                                    +
+                                                                </span>
+
+                                                                </a>
+                                                                <a href="#" class="{{ comment.id }} com-like-minus"
+                                                                   data-action="dislike">
+                                                                <span class="{{ comment.id }} com-dislike-minus">
+                                                                    <svg class="{{ comment.id }}" width="24"
+                                                                         height="24">
+                                                                        <use class="{{ comment.id }}"
+                                                                             xlink:href="#i__thumbdown"></use>
+                                                                    </svg>
+                                                                    <span class="{{ comment.id }} {{ comment.id }}-com-dislike-count">
+                                                                        {{ comment.newscommentsdislikemodel_set.count }}
+                                                                    </span>
+                                                                    -
+                                                                </span>
+
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <ol class="comments-tree-list">
+                                            {% for sub_comment in comment.newscommentsmodel_set.all %}
+                                                {% if sub_comment.is_active %}
+                                                    <li id="{{ sub_comment.user }}-{{ sub_comment.id }}"
+                                                        class="comments-tree-item">
+                                                        <div>
+                                                            <div class="comment {% if sub_comment.user.is_staff %} add-comm 
+                                                                {% else %}{% if sub_comment.newscommentslikemodel_set.count == sub_comment.newscommentsdislikemodel_set.count %} {% elif sub_comment.newscommentslikemodel_set.count >= sub_comment.newscommentsdislikemodel_set.count %}pos-comm{% else %}neg-comm{% endif %} {% endif %}"
+                                                                 id="comment-{{ sub_comment.id }}">
+                                                                <div class="comment-head">
+                                                                    <div class="avatar-status">
+                                                                        <i class="avatar fit-cover">
+                                                                            <a href="{% url 'public_profile_page' sub_comment.user.username %}"><img
+                                                                                    {% if sub_comment.user.avatar %}
+                                                                                        src="{{ sub_comment.user.avatar.image.url }}"
+                                                                                    {% else %}
+                                                                                        src="{% static 'images/noavatar.webp' %}"
+                                                                                    {% endif %}
+                                                                                        alt="MagaDja"
+                                                                                        loading="lazy"></a>
+                                                                        </i>
+                                                                    </div>
+                                                                    <span class="name truncate">
+                                                                    <a href="{% url 'public_profile_page' sub_comment.user.username %}">{{ sub_comment.user.username }}</a></span>
+                                                                    <div class="comment-meta">
+                                                                        {% if sub_comment.user.is_staff %}
+                                                                            <span class="group-label g-user">مدیر</span>
+                                                                        {% else %}
+                                                                            <span class="group-label g-user">عضو</span>
+                                                                        {% endif %}
+                                                                        <time class="date c-muted"
+                                                                              datetime="2024-03-26T20:21">
+                                                                            {{ sub_comment.send_date }}
+                                                                        </time>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="comment-text">
+                                                                    <div id="comm-id-207005">
+                                                                        {{ sub_comment.text }}
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="comment-foot">
+                                                                    {% if user.is_authenticated %}
+                                                                        <ul class="comment-tools">
+                                                                            <li class="com__reply">
+                                                                                <a href="#dle-comments-form">
+                                                                                    <svg width="24" height="24"
+                                                                                         class="{{ sub_comment.user }}-{{ sub_comment.id }}">
+                                                                                        <use class="{{ sub_comment.user }}-{{ sub_comment.id }}"
+                                                                                             xlink:href="#i__reply"></use>
+                                                                                    </svg>
+                                                                                </a>
+                                                                            </li>
+                                                                            <li class="com__edit"></li>
+                                                                            <li class="com__del"></li>
+                                                                            <li class="com__spam"></li>
+                                                                        </ul>
+                                                                    {% endif %}
+                                                                    {% if not sub_comment.user.is_staff %}
+                                                                        <div class="news-com-likes">
+                                                                            <a href="#" class="{{ sub_comment.id }}"
+                                                                               data-action="like">
+                                                                        <span class="{{ sub_comment.id }} com-like-plus">
+                                                                            <svg width="24" height="24"
+                                                                                 class="{{ sub_comment.id }}">
+                                                                                <use xlink:href="#i__thumbup"
+                                                                                     class="{{ sub_comment.id }}"></use>
+                                                                            </svg>
+
+                                                                            <span class="{{ sub_comment.id }} {{ sub_comment.id }}-com-like-count">
+                                                                                {{ sub_comment.newscommentslikemodel_set.count }}
+                                                                            </span>
+                                                                            +
+                                                                        </span>
+
+                                                                            </a>
+                                                                            <a href="#"
+                                                                               class="{{ sub_comment.id }} com-like-minus"
+                                                                               data-action="dislike">
+                                                                        <span class="{{ sub_comment.id }} com-dislike-minus">
+                                                                            <svg class="{{ sub_comment.id }}" width="24"
+                                                                                 height="24">
+                                                                                <use class="{{ sub_comment.id }}"
+                                                                                     xlink:href="#i__thumbdown"></use>
+                                                                            </svg>
+                                                                            <span class="{{ sub_comment.id }} {{ sub_comment.id }}-com-dislike-count">
+                                                                                {{ sub_comment.newscommentsdislikemodel_set.count }}
+                                                                            </span>
+                                                                            -
+                                                                        </span>
+
+                                                                            </a>
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    <ol class="comments-tree-list">
+                                                        {% for sub_sub_comment in sub_comment.newscommentsmodel_set.all %}
+                                                            {% if sub_sub_comment.is_active %}
+                                                                <li id="comments-tree-item-{{ sub_sub_comment.id }}"
+                                                                    class="comments-tree-item">
+                                                                    <div id="comment-id-207005">
+                                                                        <div class="comment {% if sub_sub_comment.user.is_staff %} add-comm 
+                                                                            {% else %}{% if sub_sub_comment.newscommentslikemodel_set.count == sub_sub_comment.newscommentsdislikemodel_set.count %} {% elif sub_sub_comment.newscommentslikemodel_set.count >= sub_sub_comment.newscommentsdislikemodel_set.count %}pos-comm{% else %}neg-comm{% endif %} {% endif %}"
+                                                                             id="comment-{{ sub_sub_comment.id }}">
+                                                                            <div class="comment-head">
+                                                                                <div class="avatar-status">
+                                                                                    <i class="avatar fit-cover">
+                                                                                        <a href="{% url 'public_profile_page' sub_sub_comment.user.username %}"><img
+                                                                                                {% if sub_sub_comment.user.avatar %}
+                                                                                                    src="{{ sub_sub_comment.user.avatar.image.url }}"
+                                                                                                {% else %}
+                                                                                                    src="{% static 'images/noavatar.webp' %}"
+                                                                                                {% endif %}
+                                                                                                    alt="MagaDja"
+                                                                                                    loading="lazy">
+                                                                                        </a>
+                                                                                    </i>
+                                                                                </div>
+                                                                                <span class="name truncate">
+                                                                                <a href="{% url 'public_profile_page' sub_sub_comment.user.username %}">{{ sub_sub_comment.user.username }}</a>
+                                                                            </span>
+                                                                                <div class="comment-meta">
+                                                                                    {% if sub_sub_comment.user.is_staff %}
+                                                                                        <span class="group-label g-user">مدیر</span>
+                                                                                    {% else %}
+                                                                                        <span class="group-label g-user">عضو</span>
+                                                                                    {% endif %}
+                                                                                    <time class="date c-muted"
+                                                                                          datetime="2024-03-26T20:21">
+                                                                                        {{ sub_sub_comment.send_date }}
+                                                                                    </time>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="comment-text">
+                                                                                <div id="comm-id-207005">
+                                                                                    {{ sub_sub_comment.text }}
+                                                                                </div>
+                                                                                {% if not sub_sub_comment.user.is_staff %}
+                                                                                    <div class="news-com-likes">
+                                                                                        <a href="#"
+                                                                                           class="{{ sub_sub_comment.id }}"
+                                                                                           data-action="like">
+                                                                                    <span class="{{ sub_sub_comment.id }} com-like-plus">
+                                                                                        <svg width="24" height="24"
+                                                                                             class="{{ sub_sub_comment.id }}">
+                                                                                            <use xlink:href="#i__thumbup"
+                                                                                                 class="{{ sub_sub_comment.id }}"></use>
+                                                                                        </svg>
+                                                                                    
+                                                                                        <span class="{{ sub_sub_comment.id }} {{ sub_sub_comment.id }}-com-like-count">
+                                                                                            {{ sub_sub_comment.newscommentslikemodel_set.count }}
+                                                                                        </span>
+                                                                                        +
+                                                                                    </span>
+
+                                                                                        </a>
+                                                                                        <a href="#"
+                                                                                           class="{{ sub_sub_comment.id }} com-like-minus"
+                                                                                           data-action="dislike">
+                                                                                    <span class="{{ sub_sub_comment.id }} com-dislike-minus">
+                                                                                        <svg class="{{ sub_sub_comment.id }}"
+                                                                                             width="24" height="24">
+                                                                                            <use class="{{ sub_sub_comment.id }}"
+                                                                                                 xlink:href="#i__thumbdown"></use>
+                                                                                        </svg>
+                                                                                        <span class="{{ sub_sub_comment.id }} {{ sub_sub_comment.id }}-com-dislike-count">
+                                                                                            {{ sub_sub_comment.newscommentsdislikemodel_set.count }}
+                                                                                        </span>
+                                                                                        -
+                                                                                    </span>
+
+                                                                                        </a>
+                                                                                    </div>
+                                                                                {% endif %}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </ol>
+                                                {% endif %}
+
+                                            {% endfor %}
+                                        </ol>
+                                    {% endfor %}
+                                </ol>
+                            </div>
+                        </div>
+                        {% if comments.has_other_pages %}
+                            <div class="wrp-min">
+                                <div class="navigation">
+                                    {% if comments.has_previous %}
+                                        <span class="page_prev">
+                                <a href="?page={{ comments.previous_page_number }}">
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__arrowright"></use>
+                                    </svg>
+                                </a>
+                            </span>
+                                    {% else %}
+                                        <span class="page_prev">
+                                <span>
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__arrowright"></use>
+                                    </svg>
+                                </span>
+                            </span>
+                                    {% endif %}
+                                    <div class="pages">
+                                        <nav class="pages-list">
+                                            {% if comments.paginator.num_pages > 1 %}
+                                                {% if comments.number|add:'-5' >= 1 %}
+                                                    <a href="?page=1" class="page-link">1</a>
+                                                    {% if comments.number|add:'-5' > 1 %}
+                                                        <span class="nav_ext">...</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                                {% for num in comments.paginator.page_range %}
+                                                    {% if comments.number == num %}
+                                                        <span>{{ num }}</span>
+                                                    {% elif num > comments.number|add:'-5' and num < comments.number|add:'5' %}
+                                                        <a href="?page={{ num }}">{{ num }}</a>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if comments.number|add:'5' <= comments.paginator.num_pages %}
+                                                    {% if comments.number|add:'5' < comments.paginator.num_pages %}
+                                                        <span class="nav_ext">...</span>
+                                                    {% endif %}
+                                                    <a href="?page={{ comments.paginator.num_pages }}">{{ comments.paginator.num_pages }}</a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </nav>
+                                    </div>
+                                    {% if comments.has_next %}
+                                        <span class="page_next">
+                            <a href="?page={{ comments.next_page_number }}">
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__arrowleft"></use>
+                                </svg>
+                            </a>
+                        </span>
+                                    {% else %}
+                                        <span class="page_next">
+                            <span>
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__arrowleft"></use>
+                                </svg>
+                            </span>
+                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                {% else %}
+                    <div class="b-cont">
+                        <div class="info-line">
+                            <i class="info-line-icon c-blue">
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__info"></use>
+                                </svg>
+                            </i>
+                            <span>هنوز نظری وجود ندارد، اما شما می توانید اولین نظر را ثبت کنید!</span>
+                        </div>
+                        <div id="dle-ajax-comments"></div>
+                    </div>
+                {% endif %}
+
+
+            </div>
+
+            {% if user.is_authenticated %}
+                <div id="dle-comments-form">
+                    <div class="anchor-line"><span id="addcom-block"></span></div>
+                    <div id="addcomment" class="block b-add-comments ignore-select">
+                        <div class="b-head">
+                            <h3 class="section-title"><i class="s-green c-icon">
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__addcom"></use>
+                                </svg>
+                            </i>نظر خود را بنویسید
+                            </h3>
+                        </div>
+                        <div class="b-cont">
+                            <div class="form-group" id="comment-editor">
+                                <div class="d-flex">
+                                    <div class="message">
+
+                                    </div>
+                                    <span class="d-none text-danger" id="cancel-reply">لغو</span>
+                                </div>
+                                <label class="c-muted" for="comments">متن نظر</label>
+                                <div class="bb-editor">
+                                    <textarea name="comments" id="comments" cols="70" rows="10"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-submit">
+                                <button class="btn btn-block s-green" type="submit" name="news-submit">ارسال</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            {% endif %}
+        </div>
+
+
+    </article>
+
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'js/notyf.min.js' %}"></script>
+    <script src="{% static 'js/comment.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends '_base.html' %}
+{% block title %}صفحه پیدا نشد!{% endblock %}
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="wrp-min speedbar">
+        <div class="speedbar-panel">
+        <span
+        ><span><a href="https://appstore.liara.run/">خانه</a></span> »
+          <span class="breadcrumb_last" aria-current="page"
+          >خطای 404: صفحه پیدا نشد</span
+          ></span
+        >
+        </div>
+    </div>
+    <div class="page-head-cat">
+        <div class="wrp-min">
+            <div class="head-cat-title">
+                <h1 class="title">خطای 404</h1>
+            </div>
+        </div>
+        <i class="bg-clouds"></i>
+    </div>
+    <div class="page-cat-bg">
+        <div class="wrp page-cat-cont">
+            <div class="alert wrp-min">
+                <div class="alert_in">
+                    <div class="alert-title">
+                        <i class="i__info"
+                        >
+                            <svg width="24" height="24">
+                                <use xlink:href="#i__info"></use>
+                            </svg>
+                        </i>
+                        اخطار
+                    </div>
+                    <div class="alert-cont">
+                        صفحه ای که به دنبال آن هستید وجود ندارد
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

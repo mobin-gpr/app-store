@@ -1,0 +1,220 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block title %}بازی ها{% endblock %}
+{% block seo %}
+    <meta name="title" content="">
+    <meta name="description"
+          content="">
+    <meta name="keywords" content="بازی ها، برنامه ها، اندروید، رایگان، apk، مودها">
+    <meta name="generator" content="DataLife Engine (https://dle-news.ru)">
+    <link rel="canonical" href="https://{{ site_name }}">
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="دانلود رایگان بهترین بازی های اندروید | بازی های مود شده برای اندروید"
+          href="/search/?search=opensearch">
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="">
+    <meta property="twitter:description"
+          content="">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="{{ site_name }}">
+    <meta property="og:title" content="">
+    <meta property="og:description"
+          content="">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+{% endblock %}
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="wrp-min speedbar">
+        <div class="speedbar-panel">
+    <span
+    ><span><a href="https://appstore.liara.run/">خانه</a></span> »
+      <span class="breadcrumb_last" aria-current="page">بازی ها</span></span
+    >
+        </div>
+    </div>
+    <div class="page-head-cat">
+        <div class="wrp-min">
+            <div class="head-cat-title">
+                <h1 class="title">بازی ها</h1>
+                <div class="head-cat-tools">
+                    <button
+                            class="cat-menu-btn collapsed"
+                            type="button"
+                            title="Select a category"
+                            data-toggle="collapse"
+                            data-target="#collapse-menu"
+                    >
+                        <svg width="24" height="24">
+                            <use xlink:href="#i__settings"></use>
+                        </svg>
+                        <span class="sr-only">Select a category</span>
+                    </button>
+                </div>
+            </div>
+            <div class="cat-menu-collapse collapse" id="collapse-menu">
+                <div class="cat-menu-list">
+                    <ul>
+                        {% for cat in categories %}
+                            <li class="catalog-genres-item">
+                                <a href="{% url 'softwares_category' cat.slug %}">
+                                    {{ cat.category }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <i class="bg-clouds"></i>
+    </div>
+    <div class="page-cat-bg">
+        <div class="wrp page-cat-cont">
+            <div class="entry-listpage list-c6">
+                {% for app in apps %}
+                    <div class="entry entry-app">
+                        <div class="item">
+                            {% if app.is_update %}
+                                <span class="label label-up">آپدیت</span>
+                            {% endif %}
+                            {% if app.is_online %}
+                                <span class="label label-up left">آنلاین</span>
+                            {% endif %}
+                            {% if app.is_new %}
+                                <span class="label label-up left bottom">جدید</span>
+                            {% endif %}
+                            {% if app.is_free %}
+                                <span class="label label-free right free">رایگان</span>
+                            {% endif %}
+                            <figure class="img">
+                                <img
+                                        src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20112%20112'%3E%3C/svg%3E"
+                                        alt="Asphalt 9: Legends"
+                                        width="112"
+                                        height="112"
+                                        {% if app.icon %}data-lazy-src="{{ app.icon.url }}"
+                                            {% else %}{% static 'images/default-thumbnail.png' %}
+                                        {% endif %}
+
+                                />
+                                <noscript
+                                ><img
+                                        {% if app.icon %}src="{{ app.icon.url }}"
+                                            {% else %}{% static 'images/default-thumbnail.png' %}
+                                        {% endif %}
+                                        alt="{{ app.title }}"
+                                        width="112"
+                                        height="112"
+                                /></noscript>
+                                {% if app.is_mod %}
+                                    <span class="post__modpaid">مود</span>
+                                {% endif %}
+                            </figure>
+                            <h2 class="title">
+                                <a
+                                        class="item-link"
+                                        href="{% url 'game_detail' app.slug %}"
+                                ><span>{{ app.title }}</span></a
+                                >
+                            </h2>
+                            <span class="genre truncate"
+                            ><a href="#" rel="tag"
+                            >{{ app.main_caregory.category }}</a
+                            ></span
+                            >
+                            <ul class="entry-app-info">
+                                <li>
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__android"></use>
+                                    </svg>
+                                    <span class="truncate">{{ app.android_version }}</span>
+                                </li>
+                                <li>
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__vers"></use>
+                                    </svg>
+                                    <span class="truncate">{{ app.download_count }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if page_obj.has_other_pages %}
+                <div class="wrp-min">
+                    <div class="navigation">
+                        {% if page_obj.has_previous %}
+                            <span class="page_prev">
+                                <a href="?page={{ page_obj.previous_page_number }}">
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__arrowright"></use>
+                                    </svg>
+                                </a>
+                            </span>
+                        {% else %}
+                            <span class="page_prev">
+                                <span>
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__arrowright"></use>
+                                    </svg>
+                                </span>
+                            </span>
+                        {% endif %}
+                        <div class="pages">
+                            <nav class="pages-list">
+                                {% if page_obj.paginator.num_pages > 1 %}
+                                    {% if page_obj.number|add:'-5' >= 1 %}
+                                        <a href="?page=1" class="page-link">1</a>
+                                        {% if page_obj.number|add:'-5' > 1 %}
+                                            <span class="nav_ext">...</span>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <span>{{ num }}</span>
+                                        {% elif num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
+                                            <a href="?page={{ num }}">{{ num }}</a>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if page_obj.number|add:'5' <= page_obj.paginator.num_pages %}
+                                        {% if page_obj.number|add:'5' < page_obj.paginator.num_pages %}
+                                            <span class="nav_ext">...</span>
+                                        {% endif %}
+                                        <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                                    {% endif %}
+                                {% endif %}
+                            </nav>
+                        </div>
+                        {% if page_obj.has_next %}
+                            <span class="page_next">
+                            <a href="?page={{ page_obj.next_page_number }}">
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__arrowleft"></use>
+                                </svg>
+                            </a>
+                        </span>
+                        {% else %}
+                            <span class="page_next">
+                            <span>
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__arrowleft"></use>
+                                </svg>
+                            </span>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+{% endblock %}

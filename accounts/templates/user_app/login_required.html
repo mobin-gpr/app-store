@@ -1,0 +1,54 @@
+{% extends '_base.html' %}
+{% block title %}
+    نیازمند ورود به حساب کاربری
+{% endblock %}
+
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="wrp-min speedbar">
+        <div class="speedbar-panel">
+        <span
+        ><span><a href="/static">خانه</a></span> »
+          <span class="breadcrumb_last" aria-current="page"
+          >نبازمند ورود به حساب کاربری</span
+          ></span
+        >
+        </div>
+    </div>
+    <div class="page-head-cat">
+        <div class="wrp-min">
+            <div class="head-cat-title">
+                <h1 class="title">نیازمند ورود به حساب کاربری</h1>
+            </div>
+        </div>
+        <i class="bg-clouds"></i>
+    </div>
+    <div class="page-cat-bg">
+    <div class="wrp page-cat-cont">
+        <div class="alert wrp-min">
+            <div class="alert_in alert-green">
+                <div class="alert-title alert-title-green">
+                    <i class="i__info i__info-green"
+                    >
+                        <svg width="24" height="24">
+                            <use xlink:href="#i__info"></use>
+                        </svg>
+                    </i>
+                    اعلان
+                </div>
+                <div class="alert-cont">
+                    کاربر گرامی، برای درخواست اپلیکیشن نیاز است که ابتدا به حساب کاربری خود وارد شوید.
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

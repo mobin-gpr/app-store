@@ -1,0 +1,324 @@
+{% load static %}
+{% if check_auth %}
+    <header class="header">
+        <div class="wrp-min">
+            <div class="header-panel">
+                <a class="logotype" href="/" title="appstore">
+                    <span class="sr-only">appstore</span>
+                    <svg width="104" height="36">
+                        <use xlink:href="#logo-appstore"></use>
+                    </svg>
+                </a>
+                <div id="mobilemenu" class="head-tools" style="display: none;">
+                    <div class="head-tools-panel">
+                        <nav class="hmenu">
+                            <a class="hm-games" href="{% url 'games_list' %}">
+                                <span itemprop="name">
+                                    <i class="s-yellow c-icon">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__gamepad"></use>
+                                        </svg>
+                                    </i>
+                                    بازی ها
+                                </span>
+                            </a>
+                            <a class="hm-apps" href="{% url 'applications_list' %}">
+                                <span>
+                                    <i class="s-purple c-icon">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__apps"></use>
+                                        </svg>
+                                    </i>
+                                    برنامه ها
+                                </span>
+                            </a>
+                            <a class="hm-top" href="{% url 'top_apps' %}">
+                                <span>
+                                    <i class="s-red c-icon">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__cup"></use>
+                                        </svg>
+                                    </i>
+                                    بهترین ها
+                                </span>
+                            </a>
+                            <a class="hm-news" href="{% url 'news_list' %}">
+                                <span itemprop="name">
+                                    <i class="s-blue c-icon">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__flash"></use>
+                                        </svg>
+                                    </i>
+                                    اخبار
+                                </span>
+                            </a>
+                            <div class="hmenu-more dropdown">
+                                <button class="hmenu-more-btn">
+                                    <span class="hmenu-more-dots">
+                                        <i></i>
+                                        <i></i>
+                                        <i></i>
+                                    </span>
+                                </button>
+                                <div style="display: none;" class="dropdown-menu">
+                                    <div class="hmenu-order">
+                                        <a href="{% url 'request_app' %}" rel="nofollow">درخواست اپلیکیشن</a>
+                                        <svg width="32" height="32">
+                                            <use xlink:href="#i__order"></use>
+                                        </svg>
+                                    </div>
+                                    <nav class="hmenu-sub">
+                                        {% for guide in guides %}
+                                            <a href="{% url 'help_detail' guide.slug %}">{{ guide.title }}</a>
+                                        {% endfor %}
+                                    </nav>
+                                </div>
+                            </div>
+                        </nav>
+                        <form class="q-search" style="display: none;" method="get" action="{% url 'search_resault' %}" enctype="multipart/form-data">
+                            <div class="q-search-box">
+                                <label class="q-search-label" for="story">جستجو</label>
+                                {{ form.search }}
+                                {{ form.search.errors }}
+                                <button class="q-search-btn" type="submit" title="پیدا کردن">
+                                    <span class="sr-only">پیدا کردن</span>
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__search"></use>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                        <button class="menu-toggle menu-close bbcodes" aria-label="Menu Close" style="display: none;">
+                            <svg width="24" height="24">
+                                <use xlink:href="#i__close"></use>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="menu-toggle mm-overlay" style="display: none;"></div>
+                </div>
+                <div class="head-right">
+                    <div class="dropdown userpanel">
+                        <button class="dropdown-btn" data-toggle="dropdown" id="login_drop" aria-haspopup="true" aria-expanded="false">
+                            <i class="avatar fit-cover">
+                                <img {% if user.avatar.image %}src="{{ user.avatar.image.url }}" {% else %}src="{% static 'images/noavatar.webp' %}"{% endif %} alt="{{ user.username }}">
+                            </i>
+                        </button>
+                        <div class="dropdown-menu dropdown-form dropdown-menu-left" aria-labelledby="login_drop" style="display:none;">
+                            <div class="login-pane__info">
+                                <a href="{% url 'public_profile_page' user.username %}" class="avatar fit-cover">
+                                    <img {% if user.avatar.image %}src="{{ user.avatar.image.url }}" {% else %}src="{% static 'images/noavatar.webp' %}"{% endif %} alt="{{ user.username }}">
+                                </a>
+                                <div class="title">
+                                    <a href="{% url 'public_profile_page' user.username %}">{{ user.username }}</a>
+                                </div>
+                            </div>
+                            <ul class="login-pane__menu">
+                                <li><a href="{% url 'profile_page' %}">تغییر آواتار</a></li>
+                                <li><a href="{% url 'logout' %}">خروج</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button style="display: none;" class="q-search-call" aria-label="Find">
+                        <span class="sr-only">Find</span>
+                        <svg class="qs-1" width="24" height="24">
+                            <use xlink:href="#i__search"></use>
+                        </svg>
+                        <svg class="qs-2" width="24" height="24">
+                            <use xlink:href="#i__close"></use>
+                        </svg>
+                    </button>
+                </div>
+                <button class="menu-toggle menu-butter" aria-label="Mobile Menu" style="display: none;">
+                    <span class="butterbrod">
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </header>
+{% else %}
+    <header class="header">
+        <div class="wrp-min">
+            <div class="header-panel">
+                <a class="logotype" href="{% url 'index_page' %}" title="appstore">
+                    <span class="sr-only">appstore</span>
+                    <svg width="104" height="36">
+                        <use xlink:href="#logo-appstore"></use>
+                    </svg>
+                </a>
+                <div id="mobilemenu" class="head-tools" style="display: none">
+                    <div class="head-tools-panel">
+                        <nav class="hmenu">
+                            <a class="hm-games" href="{% url 'games_list' %}">
+                                <span itemprop="name">
+                                    <i class="s-yellow c-icon">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__gamepad"></use>
+                                        </svg>
+                                    </i>
+                                    بازی ها
+                                </span>
+                            </a>
+                            <a class="hm-apps" href="{% url 'applications_list' %}">
+                                <span>
+                                    <i class="s-purple c-icon">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__apps"></use>
+                                        </svg>
+                                    </i>
+                                    برنامه ها
+                                </span>
+                            </a>
+                            <a class="hm-top" href="{% url 'top_apps' %}">
+                                <span>
+                                    <i class="s-red c-icon">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__cup"></use>
+                                        </svg>
+                                    </i>
+                                    بهترین ها
+                                </span>
+                            </a>
+                            <a class="hm-news" href="{% url 'news_list' %}">
+                                <span itemprop="name">
+                                    <i class="s-blue c-icon">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__flash"></use>
+                                        </svg>
+                                    </i>
+                                    اخبار
+                                </span>
+                            </a>
+                            <div class="hmenu-more dropdown">
+                                <button class="hmenu-more-btn">
+                                    <span class="hmenu-more-dots">
+                                        <i></i>
+                                        <i></i>
+                                        <i></i>
+                                    </span>
+                                </button>
+                                <div style="display: none" class="dropdown-menu">
+                                    <div class="hmenu-order">
+                                        <a href="{% url 'request_app' %}" rel="nofollow">درخواست اپلیکیشن</a>
+                                        <svg width="32" height="32">
+                                            <use xlink:href="#i__order"></use>
+                                        </svg>
+                                    </div>
+                                    <nav class="hmenu-sub">
+                                        {% for guide in guides %}
+                                            <a href="{% url 'help_detail' guide.slug %}">{{ guide.title }}</a>
+                                        {% endfor %}
+
+                                    </nav>
+                                </div>
+                            </div>
+                        </nav>
+                        <form class="q-search" style="display: none;" method="get" action="{% url 'search_resault' %}"
+                              enctype="multipart/form-data">
+                            <div class="q-search-box">
+                                <label class="q-search-label" for="story">جستجو</label>
+                                {{ form.search }}
+                                {{ form.search.errors }}
+                                <button class="q-search-btn" type="submit" title="پیدا کردن">
+                                    <span class="sr-only">پیدا کردن</span>
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__search"></use>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                        <button class="menu-toggle menu-close bbcodes" aria-label="Menu Close" style="display: none">
+                            <svg width="24" height="24">
+                                <use xlink:href="#i__close"></use>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="menu-toggle mm-overlay" style="display: none"></div>
+                </div>
+                <div class="head-right">
+                    <button data-toggle="modal" data-target="#login" class="log-in">
+                        <span class="sr-only">ورود</span>
+                        <svg width="24" height="24">
+                            <use xlink:href="#i__user"></use>
+                        </svg>
+                    </button>
+                    <button style="display: none" class="q-search-call" aria-label="Find">
+                        <span class="sr-only">Find</span>
+                        <svg class="qs-1" width="24" height="24">
+                            <use xlink:href="#i__search"></use>
+                        </svg>
+                        <svg class="qs-2" width="24" height="24">
+                            <use xlink:href="#i__close"></use>
+                        </svg>
+                    </button>
+                </div>
+                <button class="menu-toggle menu-butter" aria-label="Mobile Menu" style="display: none">
+                    <span class="butterbrod">
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <div class="modal fade login_modal" id="login" tabindex="-1" role="dialog" aria-labelledby="login_dialog" aria-hidden="true">
+        {% csrf_token %}
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-head">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <svg width="24" height="24">
+                            <use xlink:href="#i__close"></use>
+                        </svg>
+                    </button>
+                    <h3 class="modal-title">ورود به سایت</h3>
+                    <div class="social-links">
+                        <a class="soc-gb" href="#" target="_blank" rel="nofollow noopener">
+                            <svg width="22" height="22" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="fff" fill-rule="evenodd">
+                                    <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -7559.000000)"
+                                       fill="#ffffff">
+                                        <g transform="translate(56.000000, 160.000000)">
+                                            <path d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399">
+                                            </path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                        </a>
+                        <a class="soc-gl" href="" target="_blank" rel="nofollow noopener">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+                                <path fill="#fbbb00" d="M11.56,17.67,11,19.76l-2,0a8,8,0,0,1-.06-7.5h0l1.82.34.8,1.8a4.78,4.78,0,0,0,0,3.23Z"></path>
+                                <path fill="#518ef8" d="M23.91,14.5a8,8,0,0,1-2.86,7.76h0l-2.29-.12-.32-2a4.88,4.88,0,0,0,2.06-2.44H16.2V14.5Z"></path>
+                                <path fill="#28b446" d="M21.05,22.26h0A8,8,0,0,1,9.76,21,9.33,9.33,0,0,1,9,19.8l2.6-2.13a4.79,4.79,0,0,0,6.15,2.8,4.46,4.46,0,0,0,.73-.35Z"></path>
+                                <path fill="#f14336" d="M21.15,9.82,18.55,12A4.77,4.77,0,0,0,12,13.48a4.83,4.83,0,0,0-.47,1L8.9,12.31h0A8,8,0,0,1,21.15,9.82Z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <form class="login_form" method="post">
+                        <label class="form-group">
+                            <span class="c-muted">نام کاربری</span>
+                            <input class="form-control" type="text" name="login_username" required="true"/>
+                        </label>
+                        <label class="form-group">
+                            <a class="f-left" href="{% url 'forget-password' %}">فراموشی رمز ورود</a>
+                            <span class="c-muted">رمز ورود</span>
+                            <input class="form-control" type="password" name="login_password" required="true"/>
+                        </label>
+                        <div class="form-submit btn-group">
+                            <button class="btn btn-block s-green" type="submit" id="login-ajax">
+                                ورود
+                            </button>
+                            <a href="/register" class="btn btn-block s-yellow">ثبت نام</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

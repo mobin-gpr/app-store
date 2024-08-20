@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /apps/games/
+Allow: /apps/applications/
+Allow: /apps/tops/
+Allow: /news/
+Disallow: /register
+Disallow: /forget-password/
+Disallow: /login-required/
+Disallow: /admin

@@ -1,0 +1,24 @@
+{% load render_partial %}
+<!DOCTYPE html>
+<html dir="rtl" lang="fa-IR" id="h" class="">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=5.0, width=device-width" />
+        {% include 'refrences/head.html' %}
+        {% block custom_link %}{% endblock %}
+        <title>{% block title %}{% endblock %}</title>
+        <meta name='robots' content='max-image-preview:large' />
+        {% block style %}{% endblock %}
+        {% block seo %}{% endblock %}
+    </head>
+<body>
+  {% render_partial 'template_config.views.NavbarPartialView' %}
+  {% block content %}{% endblock %}
+  {% block footer%}
+  	  {% render_partial 'template_config.views.footer_partial' %}
+  {% endblock %}
+  {% include 'refrences/scripts.html' %}
+
+  {% block script %}{% endblock %}
+</body>
+</html>

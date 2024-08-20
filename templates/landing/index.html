@@ -1,0 +1,450 @@
+{% extends '_base.html' %}
+{% load static %}
+{% load render_partial %}
+{% block title %}خانه{% endblock %}
+{% block seo %}
+    <meta name="title" content="دانلود رایگان بهترین بازی های اندروید | بازی های مود شده برای اندروید">
+    <meta name="description"
+          content="محبوب ترین بازی ها را به صورت رایگان دانلود کنید. بهترین فایل‌های APK مود شده را می‌توانید در اینجا پیدا کنید">
+    <meta name="keywords" content="بازی ها، برنامه ها، اندروید، رایگان، apk، مودها">
+    <meta name="generator" content="DataLife Engine (https://dle-news.ru)">
+    <link rel="canonical" href="https://{{ site_name }}">
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="دانلود رایگان بهترین بازی های اندروید | بازی های مود شده برای اندروید"
+          href="/search/?search=opensearch">
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="دانلود رایگان بهترین بازی های اندروید | بازی های مود شده برای اندروید">
+    <meta property="twitter:description"
+          content="Download most popular games fo free. Best modded APK files you can find here">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="{{ site_name }}">
+    <meta property="og:title" content="دانلود رایگان بهترین بازی های اندروید | بازی های مود شده برای اندروید">
+    <meta property="og:description"
+          content="Download most popular games fo free. Best modded APK files you can find here">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+{% endblock %}
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display: none">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="page-head-main">
+        <h1 class="title">دانلود بازی و برنامه اندروید</h1>
+        <img
+                width="1408"
+                height="276"
+                src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201408%20276'%3E%3C/svg%3E"
+                alt=""
+                data-lazy-src="/static/images/main_illustration.svg"
+        />
+        <noscript
+        ><img
+                width="1408"
+                height="276"
+                src="/images/main_illustration.svg"
+                alt=""
+        />
+        </noscript>
+    </div>
+    <section class="wrp section section-recom">
+        <h3 class="section-title">
+            <i class="s-green c-icon">
+                <svg width="24" height="24">
+                    <use xlink:href="#i__hot"></use>
+                </svg>
+            </i>
+            پیشنهادی
+        </h3>
+        <div class="scroll-entry-list">
+            <div class="entry-list recom-list list-c4">
+                {% for suggestion in suggestions %}
+                    <div class="entry">
+                        <div class="item recom-post recom-blue">
+                            <div class="img">
+                                <img
+                                        src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20136%20136'%3E%3C/svg%3E"
+                                        width="136"
+                                        height="136"
+                                        alt="Angry Birds Journey"
+                                        data-lazy-src="{{ suggestion.suggestion.icon.url }}"
+                                />
+                                <noscript
+                                ><img
+                                        src="{{ suggestion.suggestion.icon.url }}"
+                                        width="136"
+                                        height="136"
+                                        alt="{{ suggestion.suggestion.title }}"
+                                /></noscript>
+                            </div>
+                            <h2 class="title">
+                                <a
+                                        class="item-link"
+                                        {% if suggestion.suggestion.group == '1' %}
+                                        href="{% url 'application_detail' suggestion.suggestion.slug %}"{% else %}
+                                        href="{% url 'game_detail' suggestion.suggestion.slug %}"{% endif %}
+                                ><span class="truncate">{{ suggestion.suggestion.title }}</span></a
+                                >
+                            </h2>
+                            <span class="recom-post-vers">
+            <svg width="24" height="24">
+              <use xlink:href="#i__android"></use>
+              </svg>{{ suggestion.suggestion.android_version }}
+          </span>
+                            <i class="recom-post-bg">
+                                <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 596 300"
+                                        width="596"
+                                        height="300"
+                                        style="min-width: 596px"
+                                >
+                                    <circle fill="#37b3e5" cx="120" cy="172" r="120"/>
+                                    <circle
+                                            fill="#c74425"
+                                            style="opacity: 0.5"
+                                            cx="324"
+                                            cy="120"
+                                            r="120"
+                                    />
+                                    <circle
+                                            fill="#fede4a"
+                                            style="opacity: 0.66"
+                                            cx="476"
+                                            cy="180"
+                                            r="120"
+                                    />
+                                </svg>
+                            </i>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </section>
+
+    <section class="wrp section">
+        <div class="section-head">
+            <h3 class="section-title">
+                <i class="s-yellow c-icon">
+                    <svg width="24" height="24">
+                        <use xlink:href="#i__gamepad"></use>
+                    </svg>
+                </i>
+                بازی ها
+            </h3>
+            <a class="btn s-green btn-all" href="{% url 'games_list' %}">
+                <span>همه بازی ها</span>
+                <svg width="24" height="24">
+                    <use xlink:href="#i__arrowleft"></use>
+                </svg>
+            </a>
+        </div>
+        <div class="entry-list list-c6">
+            {% for game in games %}
+                <div class="entry entry-app">
+                    <div class="item">
+                        {% if game.is_update %}
+                            <span class="label label-up">آپدیت</span>
+                        {% endif %}
+                        {% if game.is_online %}
+                            <span class="label label-up left">آنلاین</span>
+                        {% endif %}
+                        {% if game.is_new %}
+                            <span class="label label-up left bottom">جدید</span>
+                        {% endif %}
+                        {% if game.is_free %}
+                            <span class="label label-free right free">رایگان</span>
+                        {% endif %}
+                        <figure class="img">
+                            <img
+                                    src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20112%20112'%3E%3C/svg%3E"
+                                    alt="{{ game.title }}"
+                                    width="112"
+                                    height="112"
+                                    data-lazy-src="{{ game.icon.url }}"
+                            />
+                            <noscript>
+                                <img
+                                        src="{{ game.icon.url }}"
+                                        alt="{{ game.title }}"
+                                        width="112"
+                                        height="112"
+                                /></noscript>
+                            {% if game.is_mod %}
+                                <span class="post__modpaid">مود</span>
+                            {% endif %}
+                        </figure>
+                        <h2 class="title">
+                            <a
+                                    class="item-link"
+                                    href="{% url 'game_detail' game.slug %}"
+                            ><span>{{ game.title }}</span></a
+                            >
+                        </h2>
+                        <span class="genre truncate"
+                        ><a href="{% url 'softwares_category' game.main_caregory.slug %}" rel="tag"
+                        >{{ game.main_caregory }}</a
+                        ></span
+                        >
+                        <ul class="entry-app-info">
+                            <li>
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__android"></use>
+                                </svg>
+                                <span class="truncate">{{ game.android_version }}</span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__vers"></use>
+                                </svg>
+                                <span class="truncate">{{ game.download_count }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </section>
+    <section class="wrp section">
+        <div class="section-head">
+            <h3 class="section-title">
+                <i class="s-purple c-icon">
+                    <svg width="24" height="24">
+                        <use xlink:href="#i__apps"></use>
+                    </svg>
+                </i>
+                برنامه ها
+            </h3>
+            <a class="btn s-green btn-all" href="{% url 'applications_list' %}">
+                <span>همه برنامه ها</span>
+                <svg width="24" height="24">
+                    <use xlink:href="#i__arrowleft"></use>
+                </svg>
+            </a>
+        </div>
+        <div class="entry-list list-c6">
+            {% for application in applications %}
+                <div class="entry entry-app">
+                    <div class="item">
+                        {% if application.is_update %}
+                            <span class="label label-up">آپدیت</span>
+                        {% endif %}
+                        {% if application.is_online %}
+                            <span class="label label-up left">آنلاین</span>
+                        {% endif %}
+                        {% if application.is_new %}
+                            <span class="label label-up left bottom">جدید</span>
+                        {% endif %}
+                        {% if application.is_free %}
+                            <span class="label label-free right free">رایگان</span>
+                        {% endif %}
+                        <figure class="img">
+                            <img
+                                    src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20112%20112'%3E%3C/svg%3E"
+                                    alt="{{ application.title }}"
+                                    width="112"
+                                    height="112"
+                                    data-lazy-src="{{ application.icon.url }}"
+                            />
+                            <noscript
+                            ><img
+                                    src="{{ application.icon.url }}"
+                                    alt="{{ application.title }}"
+                                    width="112"
+                                    height="112"
+                            /></noscript>
+                            {% if application.is_mod %}
+                                <span class="post__modpaid">مود</span>
+                            {% endif %}
+                        </figure>
+                        <h2 class="title">
+                            <a
+                                    class="item-link"
+                                    href="{% url 'application_detail' application.slug %}"
+                            ><span>{{ application.title }}</span></a
+                            >
+                        </h2>
+                        <span class="genre truncate"
+                        ><a href="{% url 'softwares_category' application.slug %}" rel="tag"
+                        >{{ application.main_caregory }}</a
+                        ></span
+                        >
+                        <ul class="entry-app-info">
+                            <li>
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__android"></use>
+                                </svg>
+                                <span class="truncate">{{ application.android_version }}</span>
+                            </li>
+                            <li>
+                                <svg width="24" height="24">
+                                    <use xlink:href="#i__vers"></use>
+                                </svg>
+                                <span class="truncate">{{ application.download_count }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </section>
+    <div class="dark-foot dark-section">
+        <section class="wrp section section-news">
+            <div class="section-head">
+                <h3 class="section-title">
+                    <i class="s-blue c-icon">
+                        <svg width="24" height="24">
+                            <use xlink:href="#i__flash"></use>
+                        </svg>
+                    </i>
+                    آخرین اخبار
+                </h3>
+                <a class="btn s-green btn-all" href="{% url 'news_list' %}">
+                    <span>همه اخبار</span>
+                    <svg width="24" height="24">
+                        <use xlink:href="#i__arrowleft"></use>
+                    </svg>
+                </a>
+            </div>
+            <div class="entry-list list-c2">
+                {% for news in news_list %}
+                    <div class="entry entry-news">
+                        <div class="item">
+                            <div class="pic">
+                                <figure class="fit-cover">
+                                    <img
+                                            src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20300%20300'%3E%3C/svg%3E"
+                                            alt="{{ news.title }}"
+                                            width="300"
+                                            height="300"
+                                            {% if news.image %}data-lazy-src="{{ news.image.url }}"
+                                            {% else %}data-lazy-src="{% static 'images/default-thumbnail.png' %}"{% endif %}
+                                    />
+                                    <noscript
+                                    ><img
+                                            {% if news.image %}src="{{ news.image.url }}"
+                                            {% else %}src="{% static 'images/default-thumbnail.png' %}"{% endif %}
+                                            alt="{{ news.title }}"
+                                            width="300"
+                                            height="300"
+                                    /></noscript>
+                                </figure>
+                            </div>
+                            <div class="cont">
+                                <div class="meta muted">
+                                    <time class="meta-date">{{ news.jalali_created_at }}</time>
+                                    <div class="meta-view">
+                                        <svg width="24" height="24">
+                                            <use xlink:href="#i__stats"></use>
+                                        </svg>
+                                        {{ news.newsvisitmodel_set.count }}
+                                    </div>
+                                </div>
+                                <h2 class="title">
+                                    <a
+                                            class="item-link"
+                                            href="{% url 'news_detail' news.slug %}"
+                                    >
+                                        <span>{{ news.title }}</span>
+                                    </a>
+                                </h2>
+                                <div class="description" style="display: none">
+                                    <p>
+                                        {{ news.content|safe|truncatechars:"250" }}
+                                    </p>
+                                </div>
+                                <div class="read-more">
+                                    <a
+                                            href="{% url 'news_detail' news.slug %}"
+                                    >ادامه نوشته</a
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </section>
+        <section class="wrp section section-comments">
+            <h3 class="section-title">
+                <i class="s-green c-icon">
+                    <svg width="24" height="24">
+                        <use xlink:href="#i__coms"></use>
+                    </svg>
+                </i>
+                آخرین نظرات
+            </h3>
+            <div class="scroll-entry-list">
+                <div class="entry-list list-c3">
+                    {% for comment in comments %}
+                        <div class="entry entry-coms">
+                            <div class="item">
+                                <a
+                                        class="user"
+                                >
+                                    <i class="avatar fit-cover"
+                                    ><img
+                                            src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%200%200'%3E%3C/svg%3E"
+                                            alt="{{ comment.user.username }}"
+                                            {% if comment.user.avatar %}
+                                            data-lazy-src="{{ comment.user.avatar.image.url }}"
+                                            {% else %}
+                                            data-lazy-src="{% static 'images/noavatar.webp' %}"
+                                            {% endif %}
+                                    />
+                                        <noscript
+                                        ><img
+                                                {% if comment.user.avatar %}
+                                                    src="{{ comment.user.avatar.image.url }}"
+                                                {% else %}
+                                                    src="{% static 'images/noavatar.webp' %}"
+                                                {% endif %}
+                                                    alt="{{ comment.user.username }}"
+                                        /></noscript>
+                                    </i>
+                                    <span class="fw-b truncate">{{ comment.user }}</span>
+                                </a>
+                                <h2 class="title">
+                                    <a
+                                            class="item-link"
+                                            {% if comment.app.group == '1' %}
+                                            href="{% url 'application_detail' comment.app.slug %}"
+                                            {% else %}
+                                            href="{% url 'game_detail' comment.app.slug %}"
+                                            {% endif %}>
+                                <span class="truncate">
+                                        دانلود {% if comment.app.group == '1' %} برنامه {% else %}
+                                    بازی {% endif %} {{ comment.app.title }}
+                                    </span></a
+                                    >
+                                </h2>
+                                <div class="description">
+                                    {{ comment.text }}
+                                </div>
+                                <time class="date muted">{{ comment.send_date }}</time>
+                                <i class="entry-coms-reply">
+                                    <svg width="24" height="24">
+                                        <use xlink:href="#i__reply"></use>
+                                    </svg>
+                                </i>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% render_partial 'template_config.views.footer_partial' %}
+        {% block footer %}{% endblock %}
+    </div>
+{% endblock %}

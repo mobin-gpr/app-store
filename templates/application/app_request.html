@@ -1,0 +1,71 @@
+{% extends '_base.html' %}
+{% block title %}
+    درخواست اپلیکیشن
+{% endblock %}
+
+{% block style %}
+<style>
+    .errorlist li,
+    .messages li {
+        margin-top: 0.5rem;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    .errorlist li {
+        color: #ff3333;
+    }
+    .messages li {
+        color: #4AC86D;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="toolbar">
+        <button class="sel-dark-toggle" id="toggle-darkmod">
+            <svg class="i__moon" width="24" height="24">
+                <use xlink:href="#i__moon"></use>
+            </svg>
+            <svg class="i__sun" width="24" height="24" style="display:none;">
+                <use xlink:href="#i__sun"></use>
+            </svg>
+        </button>
+    </div>
+    <div class="page-head-main">
+        <h1 class="title">فرم سفارش برای اندروید</h1>
+
+    </div>
+    <div class="section page-orders">
+        <div class="wrp-min block-list">
+            <div class="block">
+                <div class="b-cont">
+                    <form method="POST" action="{% url 'request_app' %}"><p class="order-text"><span class="fw-b">لینک بازی را در گوگل پلی وارد کنید تا در اسرع وقت آن را به سایت اضافه کنیم.</span><br>اما،
+                        در عین حال، لطفاً توجه داشته باشید که کلیه سفارشات و مدهای مربوط به آنها (در صورت امکان)
+                     درج می شود.</p>
+                        <div class="order-form">
+                            <div class="form-group">
+                                <label class="c-muted" for="f-url">آدرس اپ پلی استور</label>
+                                {% csrf_token %}
+                                {{ form.app_link }}
+                                {{ form.app_link.errors }}
+                                {% if messages %}
+                                    <ul class="messages">
+                                        {% for message in messages %}
+                                            <li>{{ message }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            <div class="form-submit">
+                                <button class="btn btn-block s-green" id="sub" type="submit">ارسال</button>
+                            </div>
+                        </div>
+                        <div class="c-muted small">درحال حاضر <span class="fw-b">{{ request_count }}</span> درخواست در حال رسیدگی است.
+                            <br>تعداد درخواست های شما: <span class="fw-b">{{ user_request_count }}</span></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
