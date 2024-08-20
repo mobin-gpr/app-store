@@ -30,7 +30,7 @@ Features
 #### Clone the project repository:
 
 ```bash
-git clone https://github.com/mobin-gpr/appstore
+git clone https://github.com/mobin-gpr/app-store
 ```
 #### Navigate to the project directory:
 

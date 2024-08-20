@@ -34,7 +34,7 @@
 
 ####  مخزن پروژه را کلون کنید:
 ```bash
-git clone https://github.com/mobin-gpr/appstore
+git clone https://github.com/mobin-gpr/app-store
 ```
 
 #### به دایرکتوری پروژه وارد شوید:
