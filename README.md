@@ -55,5 +55,5 @@ python manage.py runserver
 ```bash
 python manage.py collectavatars
 ```
-##### [FA README](https://github.com/mobin-gpr/appstore/blob/main/README-FA.md)
+##### [FA README](https://github.com/mobin-gpr/app-store/blob/main/README-FA.md)
 
