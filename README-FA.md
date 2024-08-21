@@ -65,7 +65,7 @@ python manage.py runserver
 python manage.py collectavatars
 ```
 
-##### [EN README](https://github.com/mobin-gpr/app-store/blob/main/README-FA.md)
+##### [EN README](https://github.com/mobin-gpr/app-store/blob/main/README.md)
 
 
 </div>
