@@ -27,16 +27,11 @@ DATABASES = {
 CORS_ORIGIN_ALLOW_ALL = config("CORS_ORIGIN_ALLOW_ALL", default=True, cast=bool)
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = config(
-    "CORS_ORIGIN_WHITELIST", 
-    default="http://localhost:8000,http://127.0.0.1:8000",
-    cast=Csv()
+    "CORS_ORIGIN_WHITELIST", default="http://localhost:8000,http://127.0.0.1:8000", cast=Csv()
 )
 
 # Development Email Backend
-EMAIL_BACKEND = config(
-    "EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend"
-)
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 
 # Debug Toolbar (optional - can be added if needed)
 # INSTALLED_APPS += ['debug_toolbar']
@@ -45,9 +40,9 @@ EMAIL_BACKEND = config(
 
 # Cache - Simple in-memory cache for development
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
 
@@ -58,4 +53,3 @@ CSRF_COOKIE_SECURE = False
 SECURE_HSTS_SECONDS = 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
-
