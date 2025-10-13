@@ -19,7 +19,12 @@ pyvenv.cfg
 *$py.class
 uploads
 db.sqlite3
+*.sqlite3
 .env
+.env.local
+.env.*.local
+staticfiles/
+logs/*.log
 # C extensions
 *.so
 
