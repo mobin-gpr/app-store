@@ -33,8 +33,11 @@ sitemaps = {
     "news": NewsModelSitemap,
 }
 
+# Dynamic admin URL for security
+ADMIN_URL = getattr(settings, "ADMIN_URL", "admin/")
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path(ADMIN_URL, admin.site.urls),
     path("", include("landing.urls")),
     path("", include("accounts.urls")),
     path("accounts/", include("allauth.urls")),
