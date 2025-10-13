@@ -97,9 +97,7 @@ class SearchView(ListView):
         query = self.request.GET.get("search")
         get_object = ApplicationModel.objects.filter(is_active=True)
         objects = get_object.filter(
-            Q(title__icontains=query)
-            | Q(content__icontains=query)
-            | Q(main_caregory__category__icontains=query)
+            Q(title__icontains=query) | Q(content__icontains=query) | Q(main_caregory__category__icontains=query)
         )
         return objects
 

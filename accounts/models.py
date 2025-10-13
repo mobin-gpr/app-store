@@ -33,9 +33,7 @@ class User(AbstractUser):
         avatar (ForeignKey): A reference to the user's avatar image from the AvatarImagesModel.
     """
 
-    email_activate_code = models.CharField(
-        max_length=100, unique=True, verbose_name="کد فعالسازی حساب"
-    )
+    email_activate_code = models.CharField(max_length=100, unique=True, verbose_name="کد فعالسازی حساب")
     avatar = models.ForeignKey(
         AvatarImagesModel,
         on_delete=models.CASCADE,

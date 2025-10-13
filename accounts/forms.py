@@ -11,9 +11,7 @@ class RegisterForm(forms.Form):
     """
 
     username = forms.CharField(
-        widget=forms.TextInput(
-            attrs={"class": "form-control", "required": True, "id": "name"}
-        ),
+        widget=forms.TextInput(attrs={"class": "form-control", "required": True, "id": "name"}),
         validators=[
             validators.MinLengthValidator(4),
             validators.MaxLengthValidator(20),
@@ -30,9 +28,7 @@ class RegisterForm(forms.Form):
     )
 
     password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"class": "form-control", "required": True, "id": "password1"}
-        ),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "required": True, "id": "password1"}),
         validators=[
             validators.MinLengthValidator(8),
             validators.MaxLengthValidator(16),
@@ -49,9 +45,7 @@ class RegisterForm(forms.Form):
     )
 
     confirm_password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"class": "form-control", "required": True, "id": "password2"}
-        ),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "required": True, "id": "password2"}),
         validators=[
             validators.MinLengthValidator(8),
             validators.MaxLengthValidator(16),
@@ -68,9 +62,7 @@ class RegisterForm(forms.Form):
     )
 
     email = forms.CharField(
-        widget=forms.EmailInput(
-            attrs={"class": "form-control", "required": False, "id": "email"}
-        ),
+        widget=forms.EmailInput(attrs={"class": "form-control", "required": False, "id": "email"}),
         validators=[
             validators.MaxLengthValidator(60),
             validators.EmailValidator(message="لطفاَ یک ایمیل معتبر وارد کنید"),
@@ -138,9 +130,7 @@ class ResetPasswordForm(forms.Form):
     """
 
     new_password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"class": "form-control", "required": True, "id": "password1"}
-        ),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "required": True, "id": "password1"}),
         validators=[
             validators.MinLengthValidator(8),
             validators.MaxLengthValidator(16),
@@ -157,9 +147,7 @@ class ResetPasswordForm(forms.Form):
     )
 
     confirm_password = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={"class": "form-control", "required": True, "id": "password2"}
-        ),
+        widget=forms.PasswordInput(attrs={"class": "form-control", "required": True, "id": "password2"}),
         validators=[
             validators.MinLengthValidator(8),
             validators.MaxLengthValidator(16),
@@ -194,9 +182,7 @@ class ForgetPasswordForm(forms.Form):
     """
 
     email = forms.CharField(
-        widget=forms.EmailInput(
-            attrs={"class": "form-control", "required": False, "id": "email"}
-        ),
+        widget=forms.EmailInput(attrs={"class": "form-control", "required": False, "id": "email"}),
         validators=[
             validators.MaxLengthValidator(60),
             validators.EmailValidator(message="لطفاَ یک ایمیل معتبر وارد کنید"),

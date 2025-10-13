@@ -26,9 +26,7 @@ class NewsListView(ListView):
     paginate_by = 5
 
     def get_queryset(self):
-        return NewsModel.objects.filter(is_published=True).order_by(
-            "-created_at"
-        )  # Only show published news
+        return NewsModel.objects.filter(is_published=True).order_by("-created_at")  # Only show published news
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,9 +75,7 @@ class NewsDetailView(DetailView):
             else:
                 NewsVisitModel.objects.create(ip=user_ip, news_id=news_id)
         comments = (
-            NewsCommentsModel.objects.filter(
-                is_active=True, news_id=news_id, parent=None
-            )
+            NewsCommentsModel.objects.filter(is_active=True, news_id=news_id, parent=None)
             .order_by("-create_date")
             .prefetch_related("newscommentsmodel_set")
         )
@@ -93,9 +89,7 @@ class NewsDetailView(DetailView):
         except EmptyPage:
             paginated_comments = paginator.page(paginator.num_pages)
         context["comments"] = paginated_comments
-        context["comments_count"] = NewsCommentsModel.objects.filter(
-            is_active=True, news_id=news_id
-        ).count()
+        context["comments_count"] = NewsCommentsModel.objects.filter(is_active=True, news_id=news_id).count()
         return context
 
 
@@ -115,9 +109,7 @@ def news_reaction(request: HttpRequest):
             if NewsLikesModel.objects.filter(ip=ip, news_id=news_id).exists():
                 response = {
                     "like": NewsLikesModel.objects.filter(news_id=news_id).count(),
-                    "dislike": NewsDisLikesModel.objects.filter(
-                        news_id=news_id
-                    ).count(),
+                    "dislike": NewsDisLikesModel.objects.filter(news_id=news_id).count(),
                 }
 
             else:
@@ -127,18 +119,14 @@ def news_reaction(request: HttpRequest):
                 NewsLikesModel.objects.create(ip=ip, news_id=news_id)
                 response = {
                     "like": NewsLikesModel.objects.filter(news_id=news_id).count(),
-                    "dislike": NewsDisLikesModel.objects.filter(
-                        news_id=news_id
-                    ).count(),
+                    "dislike": NewsDisLikesModel.objects.filter(news_id=news_id).count(),
                 }
         elif reaction == "dislike":
             # Check If User Disliked The News Befor Do Nothing
             if NewsDisLikesModel.objects.filter(ip=ip, news_id=news_id).exists():
                 response = {
                     "like": NewsLikesModel.objects.filter(news_id=news_id).count(),
-                    "dislike": NewsDisLikesModel.objects.filter(
-                        news_id=news_id
-                    ).count(),
+                    "dislike": NewsDisLikesModel.objects.filter(news_id=news_id).count(),
                 }
             else:
                 # If User Was Liked The News Before Delete Like & Then Dislike The News
@@ -147,9 +135,7 @@ def news_reaction(request: HttpRequest):
                 NewsDisLikesModel.objects.create(ip=ip, news_id=news_id)
                 response = {
                     "like": NewsLikesModel.objects.filter(news_id=news_id).count(),
-                    "dislike": NewsDisLikesModel.objects.filter(
-                        news_id=news_id
-                    ).count(),
+                    "dislike": NewsDisLikesModel.objects.filter(news_id=news_id).count(),
                 }
 
     return JsonResponse(response)
@@ -165,9 +151,7 @@ class NewsCategoryListView(ListView):
     context_object_name = "news_list"
 
     def get_queryset(self):
-        return NewsModel.objects.filter(
-            is_published=True, tag__slug=self.kwargs["slug"]
-        ).order_by("-id")
+        return NewsModel.objects.filter(is_published=True, tag__slug=self.kwargs["slug"]).order_by("-id")
 
 
 def add_news_comment(request: HttpRequest):
@@ -207,64 +191,36 @@ def news_comments_reactions(request: HttpRequest):
 
         if reaction == "like":
             # Check If User Liked The App Befor Do Nothing
-            if NewsCommentsLikeModel.objects.filter(
-                ip=ip, comment_id=comment_id
-            ).exists():
+            if NewsCommentsLikeModel.objects.filter(ip=ip, comment_id=comment_id).exists():
                 response = {
-                    "like": NewsCommentsLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                    "dislike": NewsCommentsDisLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
+                    "like": NewsCommentsLikeModel.objects.filter(comment_id=comment_id).count(),
+                    "dislike": NewsCommentsDisLikeModel.objects.filter(comment_id=comment_id).count(),
                 }
 
             else:
                 # If User Was Disliked The App Before Delete Dislike & Then Like The App
-                if NewsCommentsDisLikeModel.objects.filter(
-                    ip=ip, comment_id=comment_id
-                ).exists():
-                    NewsCommentsDisLikeModel.objects.filter(
-                        ip=ip, comment_id=comment_id
-                    ).delete()
+                if NewsCommentsDisLikeModel.objects.filter(ip=ip, comment_id=comment_id).exists():
+                    NewsCommentsDisLikeModel.objects.filter(ip=ip, comment_id=comment_id).delete()
                 NewsCommentsLikeModel.objects.create(ip=ip, comment_id=comment_id)
                 response = {
-                    "like": NewsCommentsLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                    "dislike": NewsCommentsDisLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
+                    "like": NewsCommentsLikeModel.objects.filter(comment_id=comment_id).count(),
+                    "dislike": NewsCommentsDisLikeModel.objects.filter(comment_id=comment_id).count(),
                 }
         elif reaction == "dislike":
             # Check If User Disliked The App Befor Do Nothing
-            if NewsCommentsDisLikeModel.objects.filter(
-                ip=ip, comment_id=comment_id
-            ).exists():
+            if NewsCommentsDisLikeModel.objects.filter(ip=ip, comment_id=comment_id).exists():
                 response = {
-                    "like": NewsCommentsLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                    "dislike": NewsCommentsDisLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
+                    "like": NewsCommentsLikeModel.objects.filter(comment_id=comment_id).count(),
+                    "dislike": NewsCommentsDisLikeModel.objects.filter(comment_id=comment_id).count(),
                 }
             else:
                 # If User Was Liked The App Before Delete Like & Then Dislike The App
-                if NewsCommentsLikeModel.objects.filter(
-                    ip=ip, comment_id=comment_id
-                ).exists():
-                    NewsCommentsLikeModel.objects.filter(
-                        ip=ip, comment_id=comment_id
-                    ).delete()
+                if NewsCommentsLikeModel.objects.filter(ip=ip, comment_id=comment_id).exists():
+                    NewsCommentsLikeModel.objects.filter(ip=ip, comment_id=comment_id).delete()
                 NewsCommentsDisLikeModel.objects.create(ip=ip, comment_id=comment_id)
                 response = {
-                    "like": NewsCommentsLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                    "dislike": NewsCommentsDisLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
+                    "like": NewsCommentsLikeModel.objects.filter(comment_id=comment_id).count(),
+                    "dislike": NewsCommentsDisLikeModel.objects.filter(comment_id=comment_id).count(),
                 }
 
     return JsonResponse(response)
@@ -279,6 +235,4 @@ class FilterNewsByAuthorView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return NewsModel.objects.filter(
-            is_published=True, author__username=self.kwargs["user"]
-        )
+        return NewsModel.objects.filter(is_published=True, author__username=self.kwargs["user"])

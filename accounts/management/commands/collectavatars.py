@@ -13,9 +13,7 @@ class Command(BaseCommand):
         avatars_path = os.path.join(settings.BASE_DIR, "static", "avatars")
 
         if not os.path.exists(avatars_path):
-            self.stdout.write(
-                self.style.ERROR(f"The directory {avatars_path} does not exist.")
-            )
+            self.stdout.write(self.style.ERROR(f"The directory {avatars_path} does not exist."))
             return
 
         # Iterate through all files in the avatars directory
@@ -28,13 +26,9 @@ class Command(BaseCommand):
                     image_file = File(f, name=filename)
                     AvatarImagesModel.objects.create(image=image_file)
                     added_images.append(filename)
-                self.stdout.write(
-                    self.style.SUCCESS(f'Successfully added image "{filename}".')
-                )
+                self.stdout.write(self.style.SUCCESS(f'Successfully added image "{filename}".'))
 
         if not added_images:
             self.stdout.write(self.style.WARNING("No new images were added."))
         else:
-            self.stdout.write(
-                self.style.SUCCESS(f"Added {len(added_images)} new images.")
-            )
+            self.stdout.write(self.style.SUCCESS(f"Added {len(added_images)} new images."))
