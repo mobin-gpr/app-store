@@ -17,7 +17,9 @@ class EmailThread(threading.Thread):
         super().__init__()
 
     def run(self):
-        from_email = "no-reply@fox-web.ir"
+        from django.conf import settings
+
+        from_email = settings.DEFAULT_FROM_EMAIL
 
         try:
             # Render the HTML message
