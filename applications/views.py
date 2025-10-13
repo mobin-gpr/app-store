@@ -5,6 +5,10 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.exceptions import ValidationError
+from django.core.cache import cache
+
 from accounts.models import User
 from .models import (
     ApplicationModel,
@@ -19,49 +23,60 @@ from .models import (
     AppsCommentsDisLikeModel,
 )
 from utils.http_services import get_ip
+from utils.mixins import SiteContextMixin, PaginationMixin
+from utils.reactions import handle_reaction
+from utils.validators import validate_json_request, validate_positive_integer, validate_choice
 from .forms import AppRequestForm
-import json
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.contrib.sites.models import Site
 
 
-class GamesListView(ListView):
+class GamesListView(SiteContextMixin, PaginationMixin, ListView):
     """
     View for listing active games.
 
-    Displays games filtered by 'group=2' and paginated.
+    Displays all games (group=2) with pagination and category filtering.
+    Uses caching for improved performance.
     """
 
     template_name = "application/games_list.html"
     model = ApplicationModel
     context_object_name = "apps"
-    paginate_by = 12
 
     def get_queryset(self):
-        return ApplicationModel.objects.filter(is_active=True, group="2").order_by(
-            "-id"
+        """Get active games ordered by ID."""
+        return (
+            ApplicationModel.objects.filter(is_active=True, group="2")
+            .select_related("main_caregory", "author")
+            .order_by("-id")
         )
 
     def get_context_data(self, **kwargs):
+        """Add categories to context with caching."""
         context = super().get_context_data(**kwargs)
-        context["categories"] = (
-            ApplicationMainCaregoryModel.objects.filter(
-                is_active=True, applicationmodel__group="2"
+
+        # Cache categories for 10 minutes
+        cache_key = "game_categories"
+        categories = cache.get(cache_key)
+        if not categories:
+            categories = (
+                ApplicationMainCaregoryModel.objects.filter(is_active=True, applicationmodel__group="2")
+                .order_by("-id")
+                .distinct()
             )
-            .order_by("-id")
-            .distinct()
-        )
-        current_site = Site.objects.get_current()
-        site_name = current_site.name
-        context["site_name"] = site_name
+            cache.set(cache_key, categories, 600)
+
+        context["categories"] = categories
         return context
 
 
-class GamesDetailView(DetailView):
+class GamesDetailView(SiteContextMixin, DetailView):
     """
     View for displaying details of a single game.
 
-    Includes game details, related suggestions, and comments.
+    Includes:
+    - Game details
+    - Related suggestions from the same category
+    - Paginated comments with replies
+    - Help articles
     """
 
     template_name = "application/game_detail.html"
@@ -69,87 +84,97 @@ class GamesDetailView(DetailView):
     context_object_name = "app"
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(is_active=True)
-        return queryset
+        """Get active games with related data."""
+        return super().get_queryset().filter(is_active=True).select_related("main_caregory", "author")
 
     def get_context_data(self, **kwargs):
+        """Add suggestions, comments, and help articles to context."""
         context = super().get_context_data(**kwargs)
-        obj = self.object.id
-        get_object = ApplicationModel.objects.get(id=obj)
-        get_category = (
-            ApplicationModel.objects.filter(
-                is_active=True, main_caregory=get_object.main_caregory
-            )
-            .exclude(id=obj)
-            .order_by("-id")[:6]
+        app_id = self.object.id
+
+        # Get related apps from same category
+        context["suggestions"] = (
+            ApplicationModel.objects.filter(is_active=True, main_caregory=self.object.main_caregory)
+            .exclude(id=app_id)
+            .select_related("main_caregory")[:6]
         )
+
+        # Get comments with pagination
         comments = (
-            AppsCommentsModel.objects.filter(is_active=True, app_id=obj, parent=None)
-            .order_by("-create_date")
-            .prefetch_related("appscommentsmodel_set")
+            AppsCommentsModel.objects.filter(is_active=True, app_id=app_id, parent=None)
+            .select_related("user", "user__avatar")
+            .prefetch_related("replies__user", "replies__user__avatar")
         )
 
         paginator = Paginator(comments, 5)
-        page = self.request.GET.get("page")
+        page_number = self.request.GET.get("page", 1)
 
         try:
-            paginated_comments = paginator.page(page)
-        except PageNotAnInteger:
-            paginated_comments = paginator.page(1)
-        except EmptyPage:
-            paginated_comments = paginator.page(paginator.num_pages)
-        current_site = Site.objects.get_current()
-        site_name = current_site.name
-        context["suggestions"] = get_category
-        context["cat_link"] = ApplicationModel.objects.get(id=obj)
-        context["helps"] = AppsHelpModel.objects.filter(is_active=True)
-        context["user"] = User.objects.filter(id=self.request.user.id).first()
-        context["comments"] = paginated_comments
-        context["comments_count"] = AppsCommentsModel.objects.filter(
-            is_active=True, app_id=obj
-        ).count()
-        context["site_name"] = site_name
+            page_obj = paginator.page(page_number)
+        except (PageNotAnInteger, EmptyPage):
+            page_obj = paginator.page(1)
+
+        context.update(
+            {
+                "cat_link": self.object,
+                "helps": AppsHelpModel.objects.filter(is_active=True).only("id", "title", "slug"),
+                "user": self.request.user if self.request.user.is_authenticated else None,
+                "comments": page_obj,
+                "comments_count": comments.count(),
+            }
+        )
+
         return context
 
 
-class ApplicationsListView(ListView):
+class ApplicationsListView(SiteContextMixin, PaginationMixin, ListView):
     """
     View for listing active applications.
 
-    Displays applications filtered by 'group=1' and paginated.
+    Displays all applications (group=1) with pagination and category filtering.
+    Uses caching for improved performance.
     """
 
     template_name = "application/applications_list.html"
     model = ApplicationModel
     context_object_name = "apps"
-    paginate_by = 12
 
     def get_queryset(self):
-        return ApplicationModel.objects.filter(is_active=True, group="1").order_by(
-            "-id"
+        """Get active applications ordered by ID."""
+        return (
+            ApplicationModel.objects.filter(is_active=True, group="1")
+            .select_related("main_caregory", "author")
+            .order_by("-id")
         )
 
     def get_context_data(self, **kwargs):
+        """Add categories to context with caching."""
         context = super().get_context_data(**kwargs)
-        context["categories"] = (
-            ApplicationMainCaregoryModel.objects.filter(
-                is_active=True, applicationmodel__group="1"
+
+        # Cache categories for 10 minutes
+        cache_key = "app_categories"
+        categories = cache.get(cache_key)
+        if not categories:
+            categories = (
+                ApplicationMainCaregoryModel.objects.filter(is_active=True, applicationmodel__group="1")
+                .order_by("-id")
+                .distinct()
             )
-            .order_by("-id")
-            .distinct()
-        )
-        current_site = Site.objects.get_current()
-        site_name = current_site.name
-        context["site_name"] = site_name
+            cache.set(cache_key, categories, 600)
+
+        context["categories"] = categories
         return context
 
 
-class ApplicationsDetailView(DetailView):
+class ApplicationsDetailView(SiteContextMixin, DetailView):
     """
     View for displaying details of a single application.
 
-    Includes application details, related suggestions, and comments.
+    Includes:
+    - Application details
+    - Related suggestions from the same category
+    - Paginated comments with replies
+    - Help articles
     """
 
     template_name = "application/application_detail.html"
@@ -157,136 +182,136 @@ class ApplicationsDetailView(DetailView):
     context_object_name = "app"
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(is_active=True)
-        return queryset
+        """Get active applications with related data."""
+        return super().get_queryset().filter(is_active=True).select_related("main_caregory", "author")
 
     def get_context_data(self, **kwargs):
+        """Add suggestions, comments, and help articles to context."""
         context = super().get_context_data(**kwargs)
-        obj = self.object.id
-        get_object = ApplicationModel.objects.get(id=obj)
-        get_category = (
-            ApplicationModel.objects.filter(
-                is_active=True, main_caregory=get_object.main_caregory
-            )
-            .exclude(id=obj)
-            .order_by("-id")[:6]
+        app_id = self.object.id
+
+        # Get related apps from same category
+        context["suggestions"] = (
+            ApplicationModel.objects.filter(is_active=True, main_caregory=self.object.main_caregory)
+            .exclude(id=app_id)
+            .select_related("main_caregory")[:6]
         )
+
+        # Get comments with pagination
         comments = (
-            AppsCommentsModel.objects.filter(is_active=True, app_id=obj, parent=None)
-            .order_by("-create_date")
-            .prefetch_related("appscommentsmodel_set")
+            AppsCommentsModel.objects.filter(is_active=True, app_id=app_id, parent=None)
+            .select_related("user", "user__avatar")
+            .prefetch_related("replies__user", "replies__user__avatar")
         )
 
         paginator = Paginator(comments, 10)
-        page = self.request.GET.get("page")
+        page_number = self.request.GET.get("page", 1)
 
         try:
-            paginated_comments = paginator.page(page)
-        except PageNotAnInteger:
-            paginated_comments = paginator.page(1)
-        except EmptyPage:
-            paginated_comments = paginator.page(paginator.num_pages)
-        current_site = Site.objects.get_current()
-        site_name = current_site.name
-        context["suggestions"] = get_category
-        context["cat_link"] = ApplicationModel.objects.get(id=obj)
-        context["helps"] = AppsHelpModel.objects.filter(is_active=True)
-        context["user"] = User.objects.filter(id=self.request.user.id).first()
-        context["comments"] = paginated_comments
-        context["comments_count"] = AppsCommentsModel.objects.filter(
-            is_active=True, app_id=obj
-        ).count()
-        context["site_name"] = site_name
+            page_obj = paginator.page(page_number)
+        except (PageNotAnInteger, EmptyPage):
+            page_obj = paginator.page(1)
+
+        context.update(
+            {
+                "cat_link": self.object,
+                "helps": AppsHelpModel.objects.filter(is_active=True).only("id", "title", "slug"),
+                "user": self.request.user if self.request.user.is_authenticated else None,
+                "comments": page_obj,
+                "comments_count": comments.count(),
+            }
+        )
+
         return context
 
 
 def apps_reaction(request: HttpRequest):
     """
-    Handles reactions (likes and dislikes) to applications.
+    Handle like/dislike reactions for applications.
 
-    Returns the updated like and dislike counts in JSON format.
+    Expects POST request with JSON body containing:
+    - app_id: ID of the application
+    - type: 'like' or 'dislike'
+
+    Returns:
+        JSON response with updated like and dislike counts
     """
-    if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        app_id = int(data["app_id"])
-        reaction = data["type"]
+    try:
+        # Validate request
+        data = validate_json_request(request, required_fields=["app_id", "type"])
+        app_id = validate_positive_integer(data["app_id"], "app_id")
+        reaction_type = validate_choice(data["type"], ["like", "dislike"], "type")
+
+        # Get user IP
         ip = get_ip(request)
-        if reaction == "like":
-            # Check If User Liked The App Befor Do Nothing
-            if AppsLikesModel.objects.filter(ip=ip, app_id=app_id).exists():
-                response = {
-                    "like": AppsLikesModel.objects.filter(app_id=app_id).count(),
-                    "dislike": AppsDisLikesModel.objects.filter(app_id=app_id).count(),
-                }
 
-            else:
-                # If User Was Disliked The App Before Delete Dislike & Then Like The App
-                if AppsDisLikesModel.objects.filter(ip=ip, app_id=app_id).exists():
-                    AppsDisLikesModel.objects.filter(ip=ip, app_id=app_id).delete()
-                AppsLikesModel.objects.create(ip=ip, app_id=app_id)
-                response = {
-                    "like": AppsLikesModel.objects.filter(app_id=app_id).count(),
-                    "dislike": AppsDisLikesModel.objects.filter(app_id=app_id).count(),
-                }
-        elif reaction == "dislike":
-            # Check If User Disliked The App Befor Do Nothing
-            if AppsDisLikesModel.objects.filter(ip=ip, app_id=app_id).exists():
-                response = {
-                    "like": AppsLikesModel.objects.filter(app_id=app_id).count(),
-                    "dislike": AppsDisLikesModel.objects.filter(app_id=app_id).count(),
-                }
-            else:
-                # If User Was Liked The App Before Delete Like & Then Dislike The App
-                if AppsLikesModel.objects.filter(ip=ip, app_id=app_id).exists():
-                    AppsLikesModel.objects.filter(ip=ip, app_id=app_id).delete()
-                AppsDisLikesModel.objects.create(ip=ip, app_id=app_id)
-                response = {
-                    "like": AppsLikesModel.objects.filter(app_id=app_id).count(),
-                    "dislike": AppsDisLikesModel.objects.filter(app_id=app_id).count(),
-                }
+        # Handle reaction with utility function
+        success, counts = handle_reaction(
+            ip=ip,
+            object_id=app_id,
+            reaction_type=reaction_type,
+            like_model=AppsLikesModel,
+            dislike_model=AppsDisLikesModel,
+            field_name="app",
+        )
 
-    return JsonResponse(response)
+        return JsonResponse(
+            {
+                "success": success,
+                "likes": counts["likes"],
+                "dislikes": counts["dislikes"],
+            }
+        )
+
+    except ValidationError as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse({"success": False, "error": "An error occurred"}, status=500)
 
 
-class CategoryListView(ListView):
+class CategoryListView(SiteContextMixin, PaginationMixin, ListView):
     """
-    View to display apps by category.
+    View to display apps filtered by category.
 
-    Attributes:
-        model (ApplicationModel): The model to retrieve apps data.
-        template_name (str): The template used to render the category page.
-        context_object_name (str): The name of the context variable containing the apps.
-        paginate_by (int): Number of apps per page.
+    Shows all applications (both apps and games) that belong to a specific category.
+    Includes pagination and related categories for navigation.
     """
 
     model = ApplicationModel
     template_name = "application/category.html"
     context_object_name = "apps"
-    paginate_by = 12
 
     def get_queryset(self):
-        return ApplicationModel.objects.filter(
-            is_active=True, main_caregory__slug=self.kwargs["slug"]
+        """Get active apps in the specified category."""
+        return ApplicationModel.objects.filter(is_active=True, main_caregory__slug=self.kwargs["slug"]).select_related(
+            "main_caregory", "author"
         )
 
     def get_context_data(self, **kwargs):
+        """Add category information and all categories to context."""
         context = super().get_context_data(**kwargs)
-        context["category"] = ApplicationModel.objects.filter(
-            is_active=True, main_caregory__slug=self.kwargs["slug"]
-        ).first()
-        context["categories"] = ApplicationMainCaregoryModel.objects.filter(
-            is_active=True
-        ).order_by("-id")
-        current_site = Site.objects.get_current()
-        site_name = current_site.name
-        context["site_name"] = site_name
+
+        # Get category for display (use first app's category to avoid extra query)
+        queryset = self.get_queryset()
+        context["category"] = queryset.first()
+
+        # Cache all categories for 10 minutes
+        cache_key = "all_categories"
+        categories = cache.get(cache_key)
+        if not categories:
+            categories = ApplicationMainCaregoryModel.objects.filter(is_active=True).order_by("-id")
+            cache.set(cache_key, categories, 600)
+
+        context["categories"] = categories
         return context
 
 
-class TopAppsView(ListView):
+class TopAppsView(SiteContextMixin, ListView):
     """
-    View for displaying the top applications.
+    View for displaying top applications based on like count.
+
+    Shows the top 100 most-liked applications and games.
+    Uses aggregation for efficient counting and caching for performance.
     """
 
     template_name = "application/top.html"
@@ -294,36 +319,53 @@ class TopAppsView(ListView):
     context_object_name = "apps"
 
     def get_queryset(self):
-        return (
-            ApplicationModel.objects.filter(is_active=True)
-            .annotate(like_count=Count("appslikesmodel"))
-            .order_by("-like_count")[:100]
-        )
+        """Get top 100 apps ordered by like count."""
+        # Cache top apps for 5 minutes
+        cache_key = "top_apps_list"
+        top_apps = cache.get(cache_key)
+
+        if not top_apps:
+            top_apps = (
+                ApplicationModel.objects.filter(is_active=True)
+                .select_related("main_caregory", "author")
+                .annotate(like_count=Count("appslikesmodel"))
+                .order_by("-like_count")[:100]
+            )
+            cache.set(cache_key, top_apps, 300)
+
+        return top_apps
 
 
 class AppsHelpView(View):
     """
-    View for displaying help pages related to applications.
+    View for displaying help/tutorial pages.
+
+    Shows detailed help articles for users about app installation,
+    usage, or other topics.
     """
 
     def get(self, request, slug):
-        print(slug)
-        help = get_object_or_404(AppsHelpModel, slug=slug, is_active=True)
-        context = {"help": help}
-        return render(request, "application/help.html", context)
+        """Display a specific help article."""
+        help_article = get_object_or_404(AppsHelpModel, slug=slug, is_active=True)
+        return render(request, "application/help.html", {"help": help_article})
 
 
 class DownloadAppView(View):
     """
-    View for downloading applications.
+    View for handling application downloads.
+
+    Displays download page with authentication check.
+    Shows different content for authenticated vs anonymous users.
     """
 
     def get(self, request, slug):
-        check_auth = False
-        link = get_object_or_404(ApplicationLinkModel, is_active=True, slug=slug)
-        if request.user.is_authenticated:
-            check_auth = True
-        context = {"link": link, "check_auth": check_auth}
+        """Display download page for a specific app version."""
+        link = get_object_or_404(ApplicationLinkModel.objects.select_related("application"), is_active=True, slug=slug)
+
+        context = {
+            "link": link,
+            "check_auth": request.user.is_authenticated,
+        }
         return render(request, "application/download.html", context)
 
 
@@ -359,15 +401,11 @@ class AppRequestView(View):
             user_request_count = AppRequestModel.objects.filter(user_id=user.id).count()
             if form.is_valid():
                 app_link = form.cleaned_data["app_link"]
-                if not AppRequestModel.objects.filter(
-                    app_link=app_link, user=user
-                ).exists():
+                if not AppRequestModel.objects.filter(app_link=app_link, user=user).exists():
                     AppRequestModel.objects.create(user=user, app_link=app_link)
                     messages.success(request, "درخواست شما با موفقیت ثبت شد")
                 else:
-                    form.add_error(
-                        "app_link", "شما قبلاً برای این اپلیکیشن درخواست ارسال کرده اید."
-                    )
+                    form.add_error("app_link", "شما قبلاً برای این اپلیکیشن درخواست ارسال کرده اید.")
             context = {
                 "form": form,
                 "request_count": request_count,
@@ -381,124 +419,116 @@ class AppRequestView(View):
 
 def add_app_comment(request: HttpRequest):
     """
-    Handles adding comments to applications.
+    Add a new comment to an application.
 
-    Requires the user to be authenticated and returns the newly created comment in JSON format.
+    Expects POST request with JSON body containing:
+    - app_id: ID of the application
+    - app_comment: Comment text
+    - parent_id: ID of parent comment (0 for top-level comments)
+
+    Requires authentication.
+
+    Returns:
+        JSON response indicating success/failure
     """
-    if request.user.is_authenticated:
-        if request.method == "POST":
-            is_staff = True if request.user.is_staff else False
-            data = json.loads(request.body.decode("utf-8"))
-            app_id = data["app_id"]
-            app_comment = data["app_comment"]
-            get_parent_id = int(data["parent_id"])
-            parent_id = None if get_parent_id == 0 else get_parent_id
-            new_comment = AppsCommentsModel(
-                app_id=app_id,
-                text=app_comment,
-                parent_id=parent_id,
-                user_id=request.user.id,
-                is_active=is_staff,
-            )
-            new_comment.save()
-            response = {"success": True}
-            return JsonResponse(response)
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Authentication required"}, status=401)
+
+    try:
+        # Validate request
+        data = validate_json_request(request, required_fields=["app_id", "app_comment", "parent_id"])
+        app_id = validate_positive_integer(data["app_id"], "app_id")
+        comment_text = data["app_comment"].strip()
+        parent_id = int(data["parent_id"]) or None
+
+        # Validate comment text
+        if not comment_text or len(comment_text) < 3:
+            raise ValidationError("Comment must be at least 3 characters long")
+
+        if len(comment_text) > 1000:
+            raise ValidationError("Comment must be less than 1000 characters")
+
+        # Create comment
+        AppsCommentsModel.objects.create(
+            app_id=app_id,
+            text=comment_text,
+            parent_id=parent_id,
+            user_id=request.user.id,
+            is_active=request.user.is_staff,  # Auto-approve for staff
+        )
+
+        return JsonResponse({"success": True})
+
+    except ValidationError as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse({"success": False, "error": "An error occurred"}, status=500)
 
 
 def comments_reactions(request: HttpRequest):
     """
-    Handles reactions (likes and dislikes) to comments.
+    Handle like/dislike reactions for comments.
 
-    Returns the updated like and dislike counts for the comment in JSON format.
+    Expects POST request with JSON body containing:
+    - comment_id: ID of the comment
+    - type: 'like' or 'dislike'
+
+    Returns:
+        JSON response with updated like and dislike counts
     """
-    if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        comment_id = int(data["comment_id"])
-        reaction = data["type"]
-        print(comment_id, reaction)
+    try:
+        # Validate request
+        data = validate_json_request(request, required_fields=["comment_id", "type"])
+        comment_id = validate_positive_integer(data["comment_id"], "comment_id")
+        reaction_type = validate_choice(data["type"], ["like", "dislike"], "type")
+
+        # Get user IP
         ip = get_ip(request)
-        if reaction == "like":
-            # Check If User Liked The App Befor Do Nothing
-            if AppsCommentsLikeModel.objects.filter(
-                ip=ip, comment_id=comment_id
-            ).exists():
-                response = {
-                    "like": AppsCommentsLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                    "dislike": AppsCommentsDisLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                }
 
-            else:
-                # If User Was Disliked The App Before Delete Dislike & Then Like The App
-                if AppsCommentsDisLikeModel.objects.filter(
-                    ip=ip, comment_id=comment_id
-                ).exists():
-                    AppsCommentsDisLikeModel.objects.filter(
-                        ip=ip, comment_id=comment_id
-                    ).delete()
-                AppsCommentsLikeModel.objects.create(ip=ip, comment_id=comment_id)
-                response = {
-                    "like": AppsCommentsLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                    "dislike": AppsCommentsDisLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                }
-        elif reaction == "dislike":
-            # Check If User Disliked The App Befor Do Nothing
-            if AppsCommentsDisLikeModel.objects.filter(
-                ip=ip, comment_id=comment_id
-            ).exists():
-                response = {
-                    "like": AppsCommentsLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                    "dislike": AppsCommentsDisLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                }
-            else:
-                # If User Was Liked The App Before Delete Like & Then Dislike The App
-                if AppsCommentsLikeModel.objects.filter(
-                    ip=ip, comment_id=comment_id
-                ).exists():
-                    AppsCommentsLikeModel.objects.filter(
-                        ip=ip, comment_id=comment_id
-                    ).delete()
-                AppsCommentsDisLikeModel.objects.create(ip=ip, comment_id=comment_id)
-                response = {
-                    "like": AppsCommentsLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                    "dislike": AppsCommentsDisLikeModel.objects.filter(
-                        comment_id=comment_id
-                    ).count(),
-                }
+        # Handle reaction with utility function
+        success, counts = handle_reaction(
+            ip=ip,
+            object_id=comment_id,
+            reaction_type=reaction_type,
+            like_model=AppsCommentsLikeModel,
+            dislike_model=AppsCommentsDisLikeModel,
+            field_name="comment",
+        )
 
-    return JsonResponse(response)
+        return JsonResponse(
+            {
+                "success": success,
+                "likes": counts["likes"],
+                "dislikes": counts["dislikes"],
+            }
+        )
+
+    except ValidationError as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse({"success": False, "error": "An error occurred"}, status=500)
 
 
-class FilterAppByAuthorView(ListView):
+class FilterAppByAuthorView(SiteContextMixin, PaginationMixin, ListView):
     """
-    View for filtering applications by a specific author.
+    View for filtering applications by author/publisher.
+
+    Displays all applications published by a specific user.
+    Useful for browsing all apps from a trusted developer.
     """
 
     model = ApplicationModel
     template_name = "application/category.html"
     context_object_name = "apps"
-    paginate_by = 12
 
     def get_queryset(self):
-        return ApplicationModel.objects.filter(
-            is_active=True, author__username=self.kwargs["user"]
+        """Get active apps by specific author."""
+        return ApplicationModel.objects.filter(is_active=True, author__username=self.kwargs["user"]).select_related(
+            "main_caregory", "author"
         )
 
     def get_context_data(self, **kwargs):
+        """Add author information to context."""
         context = super().get_context_data(**kwargs)
-        current_site = Site.objects.get_current()
-        site_name = current_site.name
-        context["site_name"] = site_name
+        context["author_username"] = self.kwargs["user"]
+        return context
