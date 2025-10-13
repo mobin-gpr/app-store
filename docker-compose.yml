@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: appstore_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=appstore_db
+      - POSTGRES_USER=appstore_user
+      - POSTGRES_PASSWORD=appstore_password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appstore_user -d appstore_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - appstore_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: appstore_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - appstore_network
+
+  # Django Application (Development)
+  web:
+    build:
+      context: .
+      target: development
+    container_name: appstore_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/uploads
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_ENV=development
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=appstore_db
+      - DB_USER=appstore_user
+      - DB_PASSWORD=appstore_password
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - appstore_network
+
+  # Nginx (Production)
+  nginx:
+    image: nginx:alpine
+    container_name: appstore_nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/uploads:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    networks:
+      - appstore_network
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
+
+networks:
+  appstore_network:
+    driver: bridge
+
