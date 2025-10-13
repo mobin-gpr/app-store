@@ -3,60 +3,68 @@ from django.http import Http404, HttpRequest, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.crypto import get_random_string
 from django.views.generic import View
-from .forms import RegisterForm, ResetPasswordForm, ForgetPasswordForm
-from .models import User, AvatarImagesModel
 from django.urls import reverse
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from utils.email_service import send_styled_mail
-import json
+from django.core.exceptions import ValidationError
+from django.core.cache import cache
+
+from .forms import RegisterForm, ResetPasswordForm, ForgetPasswordForm
+from .models import User, AvatarImagesModel
 from applications.models import AppsCommentsModel, AppRequestModel
 from news.models import NewsCommentsModel
-from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist
+from utils.email_service import send_styled_mail
+from utils.validators import validate_json_request
 
 
 def get_site_name():
-    try:
-        current_site = Site.objects.get_current()
-        return current_site.name
-    except ObjectDoesNotExist:
-        return "Default Site Name"  # Fallback if Site model is not available
+    """
+    Get current site name with caching.
 
+    Returns:
+        str: Site name or default fallback
+    """
+    site_name = cache.get("site_name")
+    if not site_name:
+        try:
+            from django.contrib.sites.models import Site
 
-site_name = get_site_name()
+            site_name = Site.objects.get_current().name
+            cache.set("site_name", site_name, 3600)  # Cache for 1 hour
+        except Exception:
+            site_name = "App Store"  # Fallback
+    return site_name
 
 
 class RegisterView(View):
     """
-    View to handle user registration.
+    Handle user registration.
+
+    GET: Display registration form (redirect if already authenticated)
+    POST: Process registration, create user, send activation email
     """
 
     def get(self, request):
-        """
-        Renders the registration page. Redirects to profile page if the user is authenticated.
-        """
+        """Display registration form or redirect if authenticated."""
         if request.user.is_authenticated:
             return redirect(reverse("profile_page"))
-        form = RegisterForm()
-        context = {"form": form}
-        return render(request, "user_app/register.html", context)
+
+        return render(request, "user_app/register.html", {"form": RegisterForm()})
 
     def post(self, request):
-        """
-        Handles form submission for user registration. Validates and creates a new user.
-        """
+        """Process registration form and create new user."""
         form = RegisterForm(request.POST)
-        context = {"form": form}
 
         if form.is_valid():
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password")
-            email = form.cleaned_data.get("email")
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password"]
+            email = form.cleaned_data["email"]
 
+            # Check if username already exists
             if User.objects.filter(username=username).exists():
                 form.add_error("username", "نام کاربری توسط شخص دیگری انتخاب شده است.")
             else:
+                # Create inactive user with activation code
                 user = User.objects.create_user(
                     username=username,
                     email=email,
@@ -65,128 +73,177 @@ class RegisterView(View):
                 )
                 user.set_password(password)
                 user.save()
+
+                # Send activation email
                 send_styled_mail(
                     "فعالسازی حساب کاربری",
                     user.email,
-                    {"user": user, "site_name": site_name},
+                    {"user": user, "site_name": get_site_name()},
                     "template_config/emails/account_activate.html",
                 )
-                request.session.pop("user_email", None)
+
+                # Store email in session for confirmation page
                 request.session["user_email"] = user.email
                 return redirect(reverse("confirm_email"))
 
-        return render(request, "user_app/register.html", context)
+        return render(request, "user_app/register.html", {"form": form})
 
 
 class ActivateAccountView(View):
     """
-    View to handle email activation for user accounts.
+    Handle email activation for user accounts.
+
+    Activates user account using the provided activation code.
+    Generates new code after activation for security.
     """
 
     def get(self, request, email_activate_code):
-        """
-        Activates the user account based on the provided activation code.
-        """
-        user: User = User.objects.filter(
-            email_activate_code__iexact=email_activate_code
-        ).first()
-        if user is not None:
-            if not user.is_active:
-                user.is_active = True
-                user.email_activate_code = get_random_string(72)
-                user.save()
-                return redirect(reverse("index_page"))
-            else:
-                return redirect(reverse("index_page"))
-        raise Http404
+        """Activate user account with the provided code."""
+        user = User.objects.filter(email_activate_code__iexact=email_activate_code).first()
+
+        if user is None:
+            raise Http404("Invalid activation code")
+
+        if not user.is_active:
+            # Activate user and regenerate code
+            user.is_active = True
+            user.email_activate_code = get_random_string(72)
+            user.save()
+            messages.success(request, "حساب کاربری شما با موفقیت فعال شد.")
+
+        return redirect(reverse("index_page"))
 
 
 def logout_view(request):
     """
-    Logs out the user and redirects to the index page.
+    Log out the current user.
+
+    Clears the session and redirects to homepage.
     """
     logout(request)
+    messages.info(request, "شما با موفقیت خارج شدید.")
     return redirect(reverse("index_page"))
 
 
 class ProfileView(LoginRequiredMixin, View):
     """
-    View to display the user's profile page. Requires the user to be logged in.
+    Display user's private profile page.
+
+    Shows user information and available avatars.
+    Requires authentication.
     """
 
+    login_url = "/login-required/"
+
     def get(self, request):
-        """
-        Renders the profile page for the authenticated user.
-        """
-        user = get_object_or_404(User, id=request.user.id)
-        avatars = AvatarImagesModel.objects.filter(is_active=True).order_by("-id")[:16]
-        context = {"user": user, "avatars": avatars}
+        """Render the private profile page."""
+        # Get available avatars (cached)
+        cache_key = "available_avatars"
+        avatars = cache.get(cache_key)
+        if not avatars:
+            avatars = AvatarImagesModel.objects.filter(is_active=True).only("id", "image").order_by("-id")[:16]
+            cache.set(cache_key, avatars, 600)  # Cache for 10 minutes
+
+        context = {
+            "user": request.user,
+            "avatars": avatars,
+        }
         return render(request, "user_app/private_profile.html", context)
 
 
 def login_user(request: HttpRequest):
     """
-    Handles user login via a POST request. Returns authentication status as JSON.
+    Handle user login via AJAX request.
+
+    Expects POST request with JSON array: [username, password]
+
+    Returns:
+        JSON response with authentication status:
+        - 'success': Login successful
+        - 'not_active': Account not activated
+        - 'failed': Invalid credentials
     """
-    if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        username = data[0]
-        password = data[1]
+    if request.method != "POST":
+        return JsonResponse({"authenticated": "failed"}, status=405)
+
+    try:
+        # Parse request data
+        data = validate_json_request(request)
+        username = data[0] if isinstance(data, list) and len(data) >= 2 else None
+        password = data[1] if isinstance(data, list) and len(data) >= 2 else None
+
+        if not username or not password:
+            return JsonResponse({"authenticated": "failed"})
+
+        # Try to authenticate
         user = User.objects.filter(username=username).first()
 
-        if user is not None:
-            if user.check_password(password):
-                if user.is_active:
-                    login(
-                        request,
-                        user,
-                        backend="django.contrib.auth.backends.ModelBackend",
-                    )
-                    response = {"authenticated": "success"}
-                else:
-                    response = {"authenticated": "not_active"}
-            else:
-                response = {"authenticated": "failed"}
-        else:
-            response = {"authenticated": "failed"}
-    return JsonResponse(response)
+        if not user or not user.check_password(password):
+            return JsonResponse({"authenticated": "failed"})
+
+        if not user.is_active:
+            return JsonResponse({"authenticated": "not_active"})
+
+        # Log user in
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return JsonResponse({"authenticated": "success"})
+
+    except Exception:
+        return JsonResponse({"authenticated": "failed"}, status=400)
 
 
 def check_username(request: HttpRequest):
     """
-    Checks if the provided username exists in the database. Returns the result as JSON.
+    Check if a username is already taken.
+
+    Expects POST request with JSON containing username string.
+
+    Returns:
+        JSON response with 'exist' boolean
     """
-    if request.method == "POST":
-        username = json.loads(request.body.decode("utf-8"))
-        exist = User.objects.filter(username__iexact=username).exists()
-        return JsonResponse({"exist": exist})
-    if request.method == "GET":
-        raise Http404
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+    try:
+        data = validate_json_request(request)
+        username = data if isinstance(data, str) else data.get("username", "")
+
+        if not username or len(username) < 3:
+            return JsonResponse({"exist": False, "error": "Invalid username"})
+
+        exists = User.objects.filter(username__iexact=username).exists()
+        return JsonResponse({"exist": exists})
+
+    except Exception:
+        return JsonResponse({"exist": False, "error": "Invalid request"}, status=400)
 
 
 class PublicProfileView(View):
     """
-    View to display a public user profile page.
+    Display a public user profile page.
+
+    Shows user's public information, comment count, and app request count.
+    Visible to all users (authenticated or not).
     """
 
     def get(self, request, get_user):
-        """
-        Renders the public profile page for the specified user.
-        """
-        c_user = None
-        if request.user.is_authenticated:
-            c_user = User.objects.filter(id=request.user.id).first()
-        user = get_object_or_404(User, username=get_user)
+        """Render the public profile page for a specific user."""
+        # Get target user
+        user = get_object_or_404(User.objects.select_related("avatar"), username=get_user)
+
+        # Get statistics (optimized with single queries)
         comments_count = (
             AppsCommentsModel.objects.filter(user_id=user.id, is_active=True).count()
             + NewsCommentsModel.objects.filter(user_id=user.id, is_active=True).count()
         )
+
         app_requests_count = AppRequestModel.objects.filter(user_id=user.id).count()
+
         context = {
             "user": user,
             "comments_count": comments_count,
             "app_requests_count": app_requests_count,
-            "c_user": c_user,
+            "c_user": request.user if request.user.is_authenticated else None,
         }
         return render(request, "user_app/user.html", context)
 
@@ -252,7 +309,7 @@ class ForgetPasswordView(View):
                 send_styled_mail(
                     "فراموشی رمز عبور",
                     user.email,
-                    {"user": user, "site_name": site_name},
+                    {"user": user, "site_name": get_site_name()},
                     "template_config/emails/reset_password.html",
                 )
                 messages.success(request, "ایمیل بازیابی برای شما ارسال شد")
@@ -288,18 +345,43 @@ def login_required(request):
 
 def change_avatar(request):
     """
-    Allows the authenticated user to change their avatar.
-    """
-    if request.method == "POST":
-        if request.user.is_authenticated:
-            data = json.loads(request.body.decode("utf-8"))
-            user: User = User.objects.filter(id=request.user.id).first()
-            avatar_id = data["avatar_id"]
-            get_avatar = AvatarImagesModel.objects.filter(id=avatar_id).first()
-            user.avatar = get_avatar
-            user.save()
-            response = {"status": "ok", "username": user.username}
-        else:
-            response = {"status": "error"}
+    Change user's avatar.
 
-    return JsonResponse(response)
+    Expects POST request with JSON containing avatar_id.
+    Requires authentication.
+
+    Returns:
+        JSON response with status and username
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({"status": "error", "message": "Authentication required"}, status=401)
+
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+    try:
+        data = validate_json_request(request, required_fields=["avatar_id"])
+        avatar_id = int(data["avatar_id"])
+
+        # Verify avatar exists and is active
+        avatar = get_object_or_404(AvatarImagesModel, id=avatar_id, is_active=True)
+
+        # Update user's avatar
+        request.user.avatar = avatar
+        request.user.save(update_fields=["avatar"])
+
+        # Invalidate user cache if any
+        cache.delete(f"user_{request.user.id}_avatar")
+
+        return JsonResponse(
+            {
+                "status": "ok",
+                "username": request.user.username,
+                "avatar_url": avatar.image.url if avatar.image else None,
+            }
+        )
+
+    except ValidationError as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    except Exception:
+        return JsonResponse({"status": "error", "message": "An error occurred"}, status=500)
