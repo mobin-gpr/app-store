@@ -1,0 +1,64 @@
+# Base requirements - shared across all environments
+# Last updated: October 2025
+
+# Django and Core
+Django==5.1.2
+asgiref==3.8.1
+sqlparse==0.5.1
+tzdata==2024.2
+
+# Authentication & Authorization
+django-allauth==64.2.1
+PyJWT==2.9.0
+cryptography==43.0.1
+defusedxml==0.8.0rc2
+python3-openid==3.2.0
+requests-oauthlib==2.0.0
+oauthlib==3.2.2
+
+# Database
+psycopg2-binary==2.9.9
+
+# Image Processing
+Pillow==10.4.0
+
+# Environment & Configuration
+python-decouple==3.8
+
+# HTTP & API
+requests==2.32.3
+urllib3==2.2.3
+certifi==2024.8.30
+charset-normalizer==3.4.0
+idna==3.10
+
+# Persian/Jalali Date Support
+django-jalali-date==1.1.0
+jalali-core==1.0.0
+jdatetime==5.0.0
+
+# Template & Rendering
+django-render-partial==0.4
+
+# CORS
+django-cors-headers==4.5.0
+
+# Google Play Scraper
+google-play-scraper==1.2.7
+
+# AWS & Storage (optional but included in base)
+boto3==1.35.36
+botocore==1.35.36
+s3transfer==0.10.3
+jmespath==1.0.1
+python-dateutil==2.9.0.post0
+
+# Django Storages
+django-storages==1.14.4
+
+# Social Auth
+social-auth-core==4.5.4
+
+# Utilities
+six==1.16.0
+
