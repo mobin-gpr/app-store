@@ -5,6 +5,8 @@
 # Stage 1: Base image with Python
 FROM python:3.11-slim as base
 
+# Note: This project supports Python 3.8+, but 3.11 is recommended for best performance
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

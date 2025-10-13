@@ -4,8 +4,8 @@
 
 ![App Store Cover](screenshots/cover.png)
 
-[![Django](https://img.shields.io/badge/Django-5.1-green.svg)](https://www.djangoproject.com/)
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-4.2%20LTS-green.svg)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -124,8 +124,8 @@
 ## 🛠 فناوری‌های استفاده شده
 
 ### Backend
-- **فریمورک**: Django 5.1.2
-- **زبان**: Python 3.11+
+- **فریمورک**: Django 4.2.16 LTS (پشتیبانی بلند مدت)
+- **زبان**: Python 3.8+
 - **دیتابیس**: PostgreSQL 16 (تولید) / SQLite (توسعه)
 - **کش**: Redis 7
 - **صف کار**: (آماده برای Celery)

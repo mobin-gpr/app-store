@@ -4,8 +4,8 @@
 
 ![App Store Cover](screenshots/cover.png)
 
-[![Django](https://img.shields.io/badge/Django-5.1-green.svg)](https://www.djangoproject.com/)
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-4.2%20LTS-green.svg)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
@@ -149,8 +149,8 @@ This project has been extensively refactored with enterprise-grade code quality,
 ## 🛠 Tech Stack
 
 ### Backend
-- **Framework**: Django 5.1.2
-- **Language**: Python 3.11+
+- **Framework**: Django 4.2.16 LTS (Long Term Support)
+- **Language**: Python 3.8+
 - **Database**: PostgreSQL 16 (Production) / SQLite (Development)
 - **Cache**: Redis 7
 - **Task Queue**: (Ready for Celery integration)

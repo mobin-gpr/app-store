@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-10-13
+
+### 🔄 Changed
+- **Django Version**: Downgraded to Django 4.2.16 LTS for long-term stability
+- **Python Support**: Extended support to Python 3.8+ (was 3.11+)
+- **django-stubs**: Updated to match Django 4.2 compatibility
+
+### 📝 Notes
+- Django 4.2 LTS is supported until April 2026
+- Better compatibility with production environments
+- Stable feature set with security updates
+
 ## [2.0.0] - 2025-10-13
 
 ### 🎉 Major Refactoring & Improvements

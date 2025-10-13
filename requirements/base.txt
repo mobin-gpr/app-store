@@ -1,8 +1,8 @@
 # Base requirements - shared across all environments
 # Last updated: October 2025
 
-# Django and Core
-Django==5.1.2
+# Django and Core (LTS Version)
+Django==4.2.16
 asgiref==3.8.1
 sqlparse==0.5.1
 tzdata==2024.2
