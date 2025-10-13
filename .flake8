@@ -1,16 +1,23 @@
 [flake8]
-exclude =
+max-line-length = 120
+exclude = 
     .git,
-    .gitignore,
-    *.pot,
-    *.py[co],
     __pycache__,
+    */migrations/*,
     venv,
-    .env,
-    __init__.py,
-    tests.py,
-    settings.py,
+    env,
+    ENV,
     .venv,
-ignore =
+    staticfiles,
+    uploads,
+    logs,
+    build,
+    dist,
+    *.egg-info
+ignore = 
+    E203,
+    E266,
     E501,
-    W503
+    W503,
+    E722
+max-complexity = 10

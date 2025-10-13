@@ -1,0 +1,23 @@
+[MASTER]
+load-plugins=pylint_django
+django-settings-module=config.settings
+
+[MESSAGES CONTROL]
+disable=
+    C0111,  # missing-docstring
+    C0103,  # invalid-name
+    R0903,  # too-few-public-methods
+    R0913,  # too-many-arguments
+    W0212,  # protected-access
+
+[FORMAT]
+max-line-length=120
+
+[BASIC]
+good-names=i,j,k,ex,Run,_,id,pk
+
+[DESIGN]
+max-args=7
+max-attributes=10
+min-public-methods=0
+
