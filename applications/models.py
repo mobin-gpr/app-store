@@ -17,9 +17,7 @@ class AppRequestModel(models.Model):
     Model to represent an application request by a user.
     """
 
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="درخواست کننده"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="درخواست کننده")
     app_link = models.URLField(verbose_name="لینک برنامه")
 
     class Meta:
@@ -37,9 +35,7 @@ class AppsHelpModel(models.Model):
 
     title = models.CharField(max_length=200, verbose_name="عنوان آموزش")
     description = models.TextField(verbose_name="توضیح آموزش")
-    slug = models.SlugField(
-        verbose_name="اسلاگ", max_length=400, unique=True, allow_unicode=True
-    )
+    slug = models.SlugField(verbose_name="اسلاگ", max_length=400, unique=True, allow_unicode=True)
     is_active = models.BooleanField(default=True, verbose_name="منشر شود؟")
 
     class Meta:
@@ -58,15 +54,16 @@ class ApplicationMainCaregoryModel(models.Model):
     Model to represent the main categories of applications.
     """
 
-    category = models.CharField(max_length=200, verbose_name="دسته اصلی")
-    slug = models.SlugField(
-        max_length=400, unique=True, verbose_name="اسلاگ", allow_unicode=True
-    )
-    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
+    category = models.CharField(max_length=200, verbose_name="دسته اصلی", db_index=True)
+    slug = models.SlugField(max_length=400, unique=True, verbose_name="اسلاگ", allow_unicode=True, db_index=True)
+    is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال", db_index=True)
 
     class Meta:
         verbose_name = "دسته اصلی"
         verbose_name_plural = "دسته های اصلی"
+        indexes = [
+            models.Index(fields=["is_active", "slug"]),
+        ]
 
     def __str__(self):
         return self.category
@@ -90,56 +87,39 @@ class ApplicationModel(models.Model):
         verbose_name="دسته اصلی",
         null=True,
     )
-    author = models.ForeignKey(
-        User, on_delete=models.SET_NULL, verbose_name="ناشر", null=True
-    )
-    slug = models.SlugField(
-        max_length=400, unique=True, verbose_name="اسلاگ", allow_unicode=True
-    )
-    link_description = models.CharField(
-        max_length=200, blank=True, null=True, verbose_name="توضیحات بالای لینک"
-    )
-    link_information = models.TextField(
-        blank=True, null=True, verbose_name="توضیحات زیر لینک"
-    )
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="ناشر", null=True)
+    slug = models.SlugField(max_length=400, unique=True, verbose_name="اسلاگ", allow_unicode=True)
+    link_description = models.CharField(max_length=200, blank=True, null=True, verbose_name="توضیحات بالای لینک")
+    link_information = models.TextField(blank=True, null=True, verbose_name="توضیحات زیر لینک")
     update = models.DateTimeField(verbose_name="تاریخ به روزرسانی")
-    version = models.CharField(
-        max_length=200, verbose_name="نسخه", blank=True, null=True
-    )
-    android_version = models.CharField(
-        max_length=200, verbose_name="نسخه مورد نیاز", blank=True, null=True
-    )
-    seo_description = models.CharField(
-        max_length=200, verbose_name="توضیحات سئو", null=True, blank=True
-    )
+    version = models.CharField(max_length=200, verbose_name="نسخه", blank=True, null=True)
+    android_version = models.CharField(max_length=200, verbose_name="نسخه مورد نیاز", blank=True, null=True)
+    seo_description = models.CharField(max_length=200, verbose_name="توضیحات سئو", null=True, blank=True)
     content = models.TextField(verbose_name="محتوا", blank=True, null=True)
-    price = models.CharField(
-        max_length=200, verbose_name="قیمت در استور", blank=True, null=True
-    )
-    creator = models.CharField(
-        max_length=200, verbose_name="سازنده", blank=True, null=True
-    )
-    score = models.CharField(
-        max_length=200, verbose_name="امتیاز", blank=True, null=True
-    )
-    download_count = models.PositiveIntegerField(
-        default=0, verbose_name="تعداد دانلود", blank=True, null=True
-    )
-    ages = models.CharField(
-        max_length=200, verbose_name="رده سنی", blank=True, null=True
-    )
+    price = models.CharField(max_length=200, verbose_name="قیمت در استور", blank=True, null=True)
+    creator = models.CharField(max_length=200, verbose_name="سازنده", blank=True, null=True)
+    score = models.CharField(max_length=200, verbose_name="امتیاز", blank=True, null=True)
+    download_count = models.PositiveIntegerField(default=0, verbose_name="تعداد دانلود", blank=True, null=True)
+    ages = models.CharField(max_length=200, verbose_name="رده سنی", blank=True, null=True)
     size = models.CharField(max_length=200, verbose_name="سایز", blank=True, null=True)
     icon = models.ImageField(upload_to="images/icons/", verbose_name="آیکون")
     is_update = models.BooleanField(default=False, verbose_name="آپدیت")
     is_online = models.BooleanField(default=False, verbose_name="آنلاین")
     is_new = models.BooleanField(default=False, verbose_name="جدید")
-    is_mod = models.BooleanField(default=False, verbose_name="مود")
-    is_free = models.BooleanField(default=False, verbose_name="رایگان")
-    is_active = models.BooleanField(default=True, verbose_name="منتشر شود؟")
+    is_mod = models.BooleanField(default=False, verbose_name="مود", db_index=True)
+    is_free = models.BooleanField(default=False, verbose_name="رایگان", db_index=True)
+    is_active = models.BooleanField(default=True, verbose_name="منتشر شود؟", db_index=True)
 
     class Meta:
         verbose_name = "نرم افزار"
         verbose_name_plural = "نرم افزارها"
+        indexes = [
+            models.Index(fields=["is_active", "-id"]),
+            models.Index(fields=["group", "is_active", "-id"]),
+            models.Index(fields=["slug"]),
+            models.Index(fields=["main_caregory", "is_active"]),
+        ]
+        ordering = ["-id"]
 
     def __str__(self):
         return self.title
@@ -155,10 +135,11 @@ class ApplicationModel(models.Model):
         return url
 
     def seo_desc(self):
+        """Returns the SEO description or empty string if not set."""
         if self.seo_description is None:
             return ""
         else:
-            self.seo_description
+            return self.seo_description
 
 
 class SuggestedAppsModel(models.Model):
@@ -187,12 +168,8 @@ class ApplicationScreenShotModel(models.Model):
     """
 
     title = models.CharField(max_length=200, verbose_name="عنوان تصویر")
-    screenshot = models.ImageField(
-        upload_to="images/screenshots/", verbose_name="اسکرین شات"
-    )
-    application = models.ForeignKey(
-        ApplicationModel, on_delete=models.CASCADE, verbose_name="برنامه"
-    )
+    screenshot = models.ImageField(upload_to="images/screenshots/", verbose_name="اسکرین شات")
+    application = models.ForeignKey(ApplicationModel, on_delete=models.CASCADE, verbose_name="برنامه")
 
     class Meta:
         verbose_name = "اسکریت شات"
@@ -214,21 +191,15 @@ class ApplicationLinkModel(models.Model):
         ("s-blue", "آبی"),
     )
     title = models.CharField(max_length=200, verbose_name="متن دکمه")
-    application = models.ForeignKey(
-        ApplicationModel, on_delete=models.CASCADE, verbose_name="برنامه"
-    )
+    application = models.ForeignKey(ApplicationModel, on_delete=models.CASCADE, verbose_name="برنامه")
     color = models.CharField(
         max_length=200,
         verbose_name="رنگ دکمه",
         choices=color_options,
         default="s-green",
     )
-    slug = models.SlugField(
-        max_length=400, verbose_name="اسلاگ", blank=True, unique=True
-    )
-    file = models.FileField(
-        upload_to="files/", verbose_name="فایل برنامه", blank=True, null=True
-    )
+    slug = models.SlugField(max_length=400, verbose_name="اسلاگ", blank=True, unique=True)
+    file = models.FileField(upload_to="files/", verbose_name="فایل برنامه", blank=True, null=True)
     volume = models.CharField(max_length=200, verbose_name="حجم")
     is_active = models.BooleanField(default=True, verbose_name="غعال/غیرغعال")
 
@@ -240,11 +211,7 @@ class ApplicationLinkModel(models.Model):
         return self.application.title
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(
-            self.application.title
-            + "-"
-            + str(randint(100000000000000, 999999999999999))
-        )
+        self.slug = slugify(self.application.title + "-" + str(randint(100000000000000, 999999999999999)))
         super(ApplicationLinkModel, self).save(*args, **kwargs)
 
 
@@ -254,9 +221,7 @@ class ApplicationImporterModel(models.Model):
     """
 
     google_play_id = models.CharField(max_length=200, verbose_name="آیدی google play")
-    author = models.ForeignKey(
-        User, on_delete=models.SET_NULL, verbose_name="ناشر", null=True, blank=True
-    )
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="ناشر", null=True, blank=True)
 
     class Meta:
         verbose_name = "ایمپورتر"
@@ -271,15 +236,9 @@ class AppsLikesModel(models.Model):
     Model to represent applications like.
     """
 
-    app = models.ForeignKey(
-        ApplicationModel, on_delete=models.CASCADE, verbose_name="نرم افزار"
-    )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="کاربر", null=True, blank=True
-    )
-    ip = models.CharField(
-        max_length=100, verbose_name="ایپی کاربر", null=True, blank=True
-    )
+    app = models.ForeignKey(ApplicationModel, on_delete=models.CASCADE, verbose_name="نرم افزار")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر", null=True, blank=True)
+    ip = models.CharField(max_length=100, verbose_name="ایپی کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "لایک"
@@ -298,15 +257,9 @@ class AppsDisLikesModel(models.Model):
     Model to represent applications like.
     """
 
-    app = models.ForeignKey(
-        ApplicationModel, on_delete=models.CASCADE, verbose_name="نرم افزار"
-    )
-    user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, verbose_name="کاربر", null=True, blank=True
-    )
-    ip = models.CharField(
-        max_length=100, verbose_name="ایپی کاربر", null=True, blank=True
-    )
+    app = models.ForeignKey(ApplicationModel, on_delete=models.CASCADE, verbose_name="نرم افزار")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="کاربر", null=True, blank=True)
+    ip = models.CharField(max_length=100, verbose_name="ایپی کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "دیسلایک"
@@ -325,29 +278,32 @@ class AppsCommentsModel(models.Model):
     Model to represent applications comments.
     """
 
-    app = models.ForeignKey(
-        ApplicationModel, on_delete=models.CASCADE, verbose_name="نرم افزار"
-    )
+    app = models.ForeignKey(ApplicationModel, on_delete=models.CASCADE, verbose_name="نرم افزار", db_index=True)
     parent = models.ForeignKey(
         "AppsCommentsModel",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
         verbose_name="والد",
+        related_name="replies",
+        db_index=True,
     )
-    user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="کاربر"
-    )
-    create_date = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="کاربر")
+    create_date = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت", db_index=True)
     text = models.TextField(verbose_name="متن نظر")
-    is_active = models.BooleanField(default=False, verbose_name="منتشر شود؟")
+    is_active = models.BooleanField(default=False, verbose_name="منتشر شود؟", db_index=True)
 
     class Meta:
         verbose_name = "نظر برنامه"
         verbose_name_plural = "نظرات برنامه ها"
+        indexes = [
+            models.Index(fields=["app", "is_active", "-create_date"]),
+            models.Index(fields=["parent", "is_active"]),
+        ]
+        ordering = ["-create_date"]
 
     def __str__(self):
-        return str(self.text)
+        return str(self.text[:50])
 
     # def save(self, *args, **kwargs):
     #     if self.parent.is_active == False:
@@ -363,12 +319,8 @@ class AppsCommentsLikeModel(models.Model):
     Model to represent applications comments like.
     """
 
-    comment = models.ForeignKey(
-        AppsCommentsModel, on_delete=models.CASCADE, verbose_name="کامنت"
-    )
-    ip = models.CharField(
-        max_length=100, verbose_name="ایپی کاربر", null=True, blank=True
-    )
+    comment = models.ForeignKey(AppsCommentsModel, on_delete=models.CASCADE, verbose_name="کامنت")
+    ip = models.CharField(max_length=100, verbose_name="ایپی کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "لایک کامنت"
@@ -383,12 +335,8 @@ class AppsCommentsDisLikeModel(models.Model):
     Model to represent applications comments like.
     """
 
-    comment = models.ForeignKey(
-        AppsCommentsModel, on_delete=models.CASCADE, verbose_name="کامنت"
-    )
-    ip = models.CharField(
-        max_length=100, verbose_name="ایپی کاربر", null=True, blank=True
-    )
+    comment = models.ForeignKey(AppsCommentsModel, on_delete=models.CASCADE, verbose_name="کامنت")
+    ip = models.CharField(max_length=100, verbose_name="ایپی کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "دیسلایک کامنت"
@@ -436,12 +384,8 @@ def create_app_record(sender, instance, created, **kwargs):
         icon_dir = f"images/icons/{random_name}"
 
         # Get MainCategory & Set it
-        if ApplicationMainCaregoryModel.objects.filter(
-            slug=slugify(data["genreId"])
-        ).exists():
-            get_genre = ApplicationMainCaregoryModel.objects.get(
-                slug=slugify(data["genreId"])
-            )
+        if ApplicationMainCaregoryModel.objects.filter(slug=slugify(data["genreId"])).exists():
+            get_genre = ApplicationMainCaregoryModel.objects.get(slug=slugify(data["genreId"]))
         else:
             get_genre = ApplicationMainCaregoryModel(
                 category=en_genre_to_fa(data["genreId"]), slug=slugify(data["genreId"])

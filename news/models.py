@@ -11,9 +11,7 @@ class TagsModel(models.Model):
     """
 
     name = models.CharField(max_length=200, verbose_name="عنوان")
-    slug = models.SlugField(
-        max_length=400, unique=True, verbose_name="اسلاگ", allow_unicode=True
-    )
+    slug = models.SlugField(max_length=400, unique=True, verbose_name="اسلاگ", allow_unicode=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
 
     class Meta:
@@ -35,23 +33,22 @@ class NewsModel(models.Model):
 
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=200, verbose_name="عنوان")
-    seo_description = models.CharField(
-        max_length=200, verbose_name="توضیحات سئو", null=True, blank=True
-    )
+    seo_description = models.CharField(max_length=200, verbose_name="توضیحات سئو", null=True, blank=True)
     content = models.TextField(verbose_name="محتوا")
-    slug = models.SlugField(
-        max_length=400, unique=True, verbose_name="اسلاگ", allow_unicode=True
-    )
-    image = models.ImageField(
-        upload_to="images/news/", verbose_name="تصویر خبر", null=True, blank=True
-    )
+    slug = models.SlugField(max_length=400, unique=True, verbose_name="اسلاگ", allow_unicode=True)
+    image = models.ImageField(upload_to="images/news/", verbose_name="تصویر خبر", null=True, blank=True)
     tag = models.ManyToManyField(TagsModel, verbose_name="برچسب")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ انتشار")
-    is_published = models.BooleanField(default=True, verbose_name="منتشر شود؟")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ انتشار", db_index=True)
+    is_published = models.BooleanField(default=True, verbose_name="منتشر شود؟", db_index=True)
 
     class Meta:
         verbose_name = "خبر"
         verbose_name_plural = "اخبار"
+        indexes = [
+            models.Index(fields=["is_published", "-created_at"]),
+            models.Index(fields=["slug"]),
+        ]
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.title
@@ -84,13 +81,9 @@ class NewsVisitModel(models.Model):
     Model to track visits to news articles.
     """
 
-    news = models.ForeignKey(
-        NewsModel, on_delete=models.SET_NULL, verbose_name="خبر", null=True
-    )
+    news = models.ForeignKey(NewsModel, on_delete=models.SET_NULL, verbose_name="خبر", null=True)
     ip = models.CharField(max_length=100, verbose_name="آی پی کاربر")
-    user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, verbose_name="کاربر", null=True, blank=True
-    )
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "بازدید خبر"
@@ -113,12 +106,8 @@ class NewsLikesModel(models.Model):
     """
 
     news = models.ForeignKey(NewsModel, on_delete=models.CASCADE, verbose_name="خبر")
-    user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, verbose_name="کاربر", null=True, blank=True
-    )
-    ip = models.CharField(
-        max_length=100, verbose_name="ایپی کاربر", null=True, blank=True
-    )
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="کاربر", null=True, blank=True)
+    ip = models.CharField(max_length=100, verbose_name="ایپی کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "لایک"
@@ -141,12 +130,8 @@ class NewsDisLikesModel(models.Model):
     """
 
     news = models.ForeignKey(NewsModel, on_delete=models.CASCADE, verbose_name="خبر")
-    user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, verbose_name="کاربر", null=True, blank=True
-    )
-    ip = models.CharField(
-        max_length=100, verbose_name="ایپی کاربر", null=True, blank=True
-    )
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="کاربر", null=True, blank=True)
+    ip = models.CharField(max_length=100, verbose_name="ایپی کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "دیسلایک"
@@ -201,12 +186,8 @@ class NewsCommentsLikeModel(models.Model):
     Model to represent likes on news comments.
     """
 
-    comment = models.ForeignKey(
-        NewsCommentsModel, on_delete=models.CASCADE, verbose_name="نظر"
-    )
-    ip = models.CharField(
-        max_length=100, verbose_name="ایپی کاربر", null=True, blank=True
-    )
+    comment = models.ForeignKey(NewsCommentsModel, on_delete=models.CASCADE, verbose_name="نظر")
+    ip = models.CharField(max_length=100, verbose_name="ایپی کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "لایک نظر"
@@ -228,12 +209,8 @@ class NewsCommentsDisLikeModel(models.Model):
     Model to represent dislikes on news comments.
     """
 
-    comment = models.ForeignKey(
-        NewsCommentsModel, on_delete=models.CASCADE, verbose_name="نظر"
-    )
-    ip = models.CharField(
-        max_length=100, verbose_name="ایپی کاربر", null=True, blank=True
-    )
+    comment = models.ForeignKey(NewsCommentsModel, on_delete=models.CASCADE, verbose_name="نظر")
+    ip = models.CharField(max_length=100, verbose_name="ایپی کاربر", null=True, blank=True)
 
     class Meta:
         verbose_name = "دیسلایک نظر"
